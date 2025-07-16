@@ -208,7 +208,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Getting Help
 - **Issues**: [GitHub Issues](https://github.com/your-username/break-assistant/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/your-username/break-assistant/discussions)
-- **Documentation**: [Wiki](https://github.com/your-username/break-assistant/wiki)
+- **Documentation**: [Wiki](https://github.com/hmjahid/break-assistant/wiki)
 
 ### Reporting Bugs
 Please include:
@@ -217,26 +217,6 @@ Please include:
 - Steps to reproduce
 - Expected vs actual behavior
 - Error messages or logs
-
-## 🗺️ Roadmap
-
-### Version 1.1
-- [ ] Cloud sync for settings and timeline
-- [ ] Mobile companion app
-- [ ] Advanced analytics and insights
-- [ ] Integration with calendar apps
-
-### Version 1.2
-- [ ] Team collaboration features
-- [ ] Break reminder sharing
-- [ ] Advanced notification options
-- [ ] Plugin system
-
-### Version 2.0
-- [ ] AI-powered break optimization
-- [ ] Health tracking integration
-- [ ] Cross-device synchronization
-- [ ] Enterprise features
 
 ---
 

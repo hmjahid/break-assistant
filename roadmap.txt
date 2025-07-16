@@ -1,0 +1,19 @@
+## 🗺️ Roadmap
+
+### Version 1.1
+- [ ] Cloud sync for settings and timeline
+- [ ] Mobile companion app
+- [ ] Advanced analytics and insights
+- [ ] Integration with calendar apps
+
+### Version 1.2
+- [ ] Team collaboration features
+- [ ] Break reminder sharing
+- [ ] Advanced notification options
+- [ ] Plugin system
+
+### Version 2.0
+- [ ] AI-powered break optimization
+- [ ] Health tracking integration
+- [ ] Cross-device synchronization
+- [ ] Enterprise features
