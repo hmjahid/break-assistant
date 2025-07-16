@@ -1,0 +1,36 @@
+{
+  "break_slots": [
+    {
+      "id": "0900_15_daily",
+      "start_time": "09:00",
+      "duration": 15,
+      "message": "Morning",
+      "repeat_pattern": "daily",
+      "enabled": true
+    },
+    {
+      "id": "1000_30_daily",
+      "start_time": "10:00",
+      "duration": 30,
+      "message": "First break",
+      "repeat_pattern": "daily",
+      "enabled": true
+    },
+    {
+      "id": "1030_15_daily",
+      "start_time": "10:30",
+      "duration": 15,
+      "message": "Test break",
+      "repeat_pattern": "daily",
+      "enabled": true
+    },
+    {
+      "id": "1200_30_daily",
+      "start_time": "12:00",
+      "duration": 30,
+      "message": "Lunch",
+      "repeat_pattern": "daily",
+      "enabled": true
+    }
+  ]
+}

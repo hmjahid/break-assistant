@@ -1,0 +1,22 @@
+{
+  "name": "System",
+  "auto_detect": true,
+  "light_theme": {
+    "bg_color": "#ffffff",
+    "fg_color": "#000000",
+    "accent_color": "#007acc",
+    "button_color": "#e1e1e1",
+    "button_hover_color": "#d1d1d1",
+    "text_color": "#333333",
+    "border_color": "#cccccc"
+  },
+  "dark_theme": {
+    "bg_color": "#2b2b2b",
+    "fg_color": "#ffffff",
+    "accent_color": "#007acc",
+    "button_color": "#404040",
+    "button_hover_color": "#505050",
+    "text_color": "#ffffff",
+    "border_color": "#555555"
+  }
+} 

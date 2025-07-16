@@ -1,0 +1,10 @@
+{
+  "name": "Dark",
+  "bg_color": "#2b2b2b",
+  "fg_color": "#ffffff",
+  "accent_color": "#007acc",
+  "button_color": "#404040",
+  "button_hover_color": "#505050",
+  "text_color": "#ffffff",
+  "border_color": "#555555"
+} 

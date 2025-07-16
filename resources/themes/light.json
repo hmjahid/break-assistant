@@ -1,0 +1,10 @@
+{
+  "name": "Light",
+  "bg_color": "#ffffff",
+  "fg_color": "#000000",
+  "accent_color": "#007acc",
+  "button_color": "#e1e1e1",
+  "button_hover_color": "#d1d1d1",
+  "text_color": "#333333",
+  "border_color": "#cccccc"
+} 

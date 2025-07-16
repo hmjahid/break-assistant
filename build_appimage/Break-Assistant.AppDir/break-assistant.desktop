@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Break Assistant
+Comment=Smart break reminder application
+Exec=break-assistant
+Icon=break-assistant
+Type=Application
+Categories=Utility;Office;
