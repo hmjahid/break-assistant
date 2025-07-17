@@ -285,6 +285,11 @@ class SettingsPage(ctk.CTkFrame):
         except Exception as e:
             print(f"DEBUG: Exception in save_settings: {e}")
             self.show_error("Error", f"Failed to save settings: {e}")
+        finally:
+            try:
+                self.master.destroy()
+            except Exception as e:
+                print(f"DEBUG: Could not destroy settings window: {e}")
     
     def apply_settings_to_main_window(self, settings: dict) -> None:
         """Apply settings immediately to the main window."""

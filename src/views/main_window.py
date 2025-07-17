@@ -17,8 +17,8 @@ class MainWindow(ctk.CTk):
         super().__init__()
         self.controller = controller
         self.title("Break Assistant")
-        self.geometry("600x400")  # Reduced width from 700 to 600
-        self.minsize(500, 300)  # Reduced minimum width from 600 to 500
+        self.geometry("500x400")  # Match break popup width
+        self.minsize(500, 300)  # Keep min width at 500
         
         # Timer variables
         self.timer_running = False
@@ -163,6 +163,7 @@ class MainWindow(ctk.CTk):
         except (ValueError, TypeError) as e:
             print(f"DEBUG: Error refreshing timer settings: {e}")
             # Keep current settings if there's an error
+        self.refresh_next_break_label()
     
     def toggle_timer(self) -> None:
         """Toggle timer start/stop."""
@@ -241,20 +242,22 @@ class MainWindow(ctk.CTk):
         # Get break duration from settings
         settings = self.controller.get_settings()
         break_duration = settings.get('break_duration', 5)
+        break_message = settings.get('break_message', 'Time for a break!')
         
         # Show break popup with dynamic details
-        self.show_break_now_popup(break_duration)
+        self.show_break_now_popup(break_duration, break_message)
     
-    def show_break_now_popup(self, break_duration: int) -> None:
+    def show_break_now_popup(self, break_duration: int, break_message: str) -> None:
         """Show break popup with dynamic details."""
         from src.views.break_popup import BreakPopup
         
         # Create break slot for the popup
         class BreakSlot:
-            def __init__(self, duration):
+            def __init__(self, duration, message):
                 self.duration = duration
+                self.message = message
         
-        break_slot = BreakSlot(break_duration)
+        break_slot = BreakSlot(break_duration, break_message)
         
         # Show popup
         popup = BreakPopup(self, self.controller)
@@ -304,6 +307,7 @@ class MainWindow(ctk.CTk):
                             self.controller.show_break_notification(break_slot, occurrence_time)
                     
                     time.sleep(30)  # Check every 30 seconds
+                    self.after(0, self.refresh_next_break_label)
                     
                 except Exception as e:
                     print(f"Timeline monitor error: {e}")
@@ -359,35 +363,29 @@ class MainWindow(ctk.CTk):
             messagebox.showerror("Error", f"Failed to open settings: {e}")
     
     def open_preferences(self) -> None:
-        """Open preferences dialog."""
         try:
-            # Ensure main window is visible and focused
             self.deiconify()
             self.lift()
             self.focus_force()
-            
             from src.views.preferences_page import PreferencesPage
-            
             preferences_window = ctk.CTkToplevel(self)
             preferences_window.title("Preferences")
-            preferences_window.geometry("500x400")
             preferences_window.transient(self)
-            
-            # Center the window
+            preferences_page = PreferencesPage(preferences_window, self.controller)
+            preferences_page.pack(fill="both", expand=True, padx=20, pady=20)
             preferences_window.update_idletasks()
-            x = (preferences_window.winfo_screenwidth() // 2) - (500 // 2)
-            y = (preferences_window.winfo_screenheight() // 2) - (400 // 2)
-            preferences_window.geometry(f"500x400+{x}+{y}")
-            
-            # Make modal after positioning
+            width = 500
+            content_height = preferences_page.winfo_reqheight() + 60
+            height = max(content_height, 500)
+            x = (preferences_window.winfo_screenwidth() // 2) - (width // 2)
+            y = (preferences_window.winfo_screenheight() // 2) - (height // 2)
+            preferences_window.geometry(f"{width}x{height}+{x}+{y}")
+            preferences_window.minsize(width, 500)
+            preferences_window.resizable(True, True)
             try:
                 preferences_window.grab_set()
             except Exception as e:
                 print(f"Warning: Could not make preferences window modal: {e}")
-            
-            preferences_page = PreferencesPage(preferences_window, self.controller)
-            preferences_page.pack(fill="both", expand=True, padx=20, pady=20)
-            
         except Exception as e:
             print(f"Error opening preferences: {e}")
             import tkinter.messagebox as messagebox

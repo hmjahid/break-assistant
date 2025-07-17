@@ -28,6 +28,7 @@ class PreferencesPage(ctk.CTkFrame):
         self.scrollable = ctk.CTkScrollableFrame(self)
         self.scrollable.grid(row=0, column=0, sticky="nsew")
         self.scrollable.grid_columnconfigure(0, weight=1)
+        self.scrollable.grid_rowconfigure(99, weight=1)  # Add a spacer row at the end
         self.scrollable.bind_all("<MouseWheel>", self._on_mousewheel)
         
         # Info section
@@ -53,9 +54,16 @@ class PreferencesPage(ctk.CTkFrame):
             print(f"Error in create_timer_settings: {e}")
             raise
         
+        # After timer settings section, add custom break message
+        try:
+            self.create_custom_message(self.scrollable, 3)
+        except Exception as e:
+            print(f"Error in create_custom_message: {e}")
+            raise
+        
         # Buttons
         try:
-            self.create_buttons(self.scrollable, 3)
+            self.create_buttons(self.scrollable, 100)
         except Exception as e:
             print(f"Error in create_buttons: {e}")
             raise
@@ -88,6 +96,18 @@ class PreferencesPage(ctk.CTkFrame):
         auto_start_check = ctk.CTkCheckBox(timer_frame, text="Auto-start next session", variable=self.auto_start_var)
         auto_start_check.grid(row=3, column=0, columnspan=2, padx=15, pady=5, sticky="w")
     
+    def create_custom_message(self, parent, row):
+        message_frame = ctk.CTkFrame(parent)
+        message_frame.grid(row=row, column=0, sticky="ew", pady=(0, 20), padx=10)
+        message_frame.grid_columnconfigure(1, weight=1)
+        message_title = ctk.CTkLabel(message_frame, text="Custom Break Message", font=ctk.CTkFont(size=16, weight="bold"))
+        message_title.grid(row=0, column=0, columnspan=2, pady=(10, 15), sticky="ew")
+        message_label = ctk.CTkLabel(message_frame, text="Break Message:", wraplength=300)
+        message_label.grid(row=1, column=0, padx=(15, 10), pady=5, sticky="w")
+        self.break_message_var = ctk.StringVar(value="Time for a break!")
+        message_entry = ctk.CTkEntry(message_frame, textvariable=self.break_message_var, width=200)
+        message_entry.grid(row=1, column=1, padx=(0, 15), pady=5, sticky="w")
+
     def create_buttons(self, parent, row):
         buttons_frame = ctk.CTkFrame(parent)
         buttons_frame.grid(row=row, column=0, sticky="ew", pady=(0, 20), padx=10)
@@ -111,8 +131,9 @@ class PreferencesPage(ctk.CTkFrame):
             
             # Set default values
             self.work_duration_var.set("20")
-            self.break_duration_var.set("5")
+            self.break_duration_var.set("1")
             self.auto_start_var.set(False)
+            self.break_message_var.set("Time for a break!")
             
             if settings:
                 print("DEBUG: work_duration type:", type(settings.get('work_duration')))
@@ -128,8 +149,8 @@ class PreferencesPage(ctk.CTkFrame):
                         self.work_duration_var.set(str(work_duration))
                         print(f"DEBUG: Set work_duration to {work_duration}")
                 except (ValueError, TypeError):
-                    print("DEBUG: Using default work_duration (25)")
-                    self.work_duration_var.set("25")
+                    print("DEBUG: Using default work_duration (20)")
+                    self.work_duration_var.set("20")
                 
                 try:
                     break_duration = settings.get('break_duration')
@@ -139,21 +160,26 @@ class PreferencesPage(ctk.CTkFrame):
                         self.break_duration_var.set(str(break_duration))
                         print(f"DEBUG: Set break_duration to {break_duration}")
                 except (ValueError, TypeError):
-                    print("DEBUG: Using default break_duration (5)")
-                    self.break_duration_var.set("5")
+                    print("DEBUG: Using default break_duration (1)")
+                    self.break_duration_var.set("1")
                 
                 # Boolean values - only set if they exist in settings
                 if 'auto_start' in settings:
                     self.auto_start_var.set(bool(settings.get('auto_start', False)))
                     print(f"DEBUG: Set auto_start to {settings.get('auto_start')}")
+                
+                if 'break_message' in settings:
+                    self.break_message_var.set(settings['break_message'])
+                    print(f"DEBUG: Set break_message to {settings['break_message']}")
             else:
                 print("DEBUG: No preferences found, using defaults")
         except Exception as e:
             print(f"Error loading preferences: {e}")
             # Set default values if loading fails
-            self.work_duration_var.set("25")
-            self.break_duration_var.set("5")
+            self.work_duration_var.set("20")
+            self.break_duration_var.set("1")
             self.auto_start_var.set(False)
+            self.break_message_var.set("Time for a break!")
     
     def save_preferences(self) -> None:
         try:
@@ -179,7 +205,8 @@ class PreferencesPage(ctk.CTkFrame):
             preferences = {
                 'work_duration': work_duration,
                 'break_duration': break_duration,
-                'auto_start': bool(self.auto_start_var.get())
+                'auto_start': bool(self.auto_start_var.get()),
+                'break_message': self.break_message_var.get()
             }
             print(f"DEBUG: Saving preferences: {preferences}")
             self.controller.save_settings(preferences)
@@ -204,9 +231,10 @@ class PreferencesPage(ctk.CTkFrame):
             self.show_error("Error", f"Failed to save preferences: {e}")
     
     def reset_preferences(self) -> None:
-        self.work_duration_var.set("25")
-        self.break_duration_var.set("5")
+        self.work_duration_var.set("20")
+        self.break_duration_var.set("1")
         self.auto_start_var.set(False)
+        self.break_message_var.set("Time for a break!")
     
     def cancel_preferences(self) -> None:
         self.master.destroy()

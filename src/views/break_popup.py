@@ -115,27 +115,22 @@ class BreakPopup(ctk.CTkToplevel):
         ok_button.pack(pady=8, padx=20, fill="x")  # Reduced pady from 10 to 8
     
     def set_break_info(self, break_slot, occurrence_time) -> None:
-        """Set break information.
-        
-        Args:
-            break_slot: Break slot information
-            occurrence_time: When the break should occur
-        """
         self.break_slot = break_slot
         self.occurrence_time = occurrence_time
-        
         if break_slot:
-            print(f"DEBUG: Setting break info - duration: {break_slot.duration} minutes")
-            self.break_info_label.configure(
-                text=f"Time for your {break_slot.duration}-minute break!"
-            )
-            self.break_remaining = break_slot.duration * 60  # Convert to seconds
+            message = getattr(break_slot, 'message', None)
+            if message:
+                self.break_info_label.configure(
+                    text=message
+                )
+            else:
+                self.break_info_label.configure(
+                    text=f"Time for your {break_slot.duration}-minute break!"
+                )
+            self.break_remaining = break_slot.duration * 60
             self.update_timer_display()
-            
-            # Automatically start the break timer after a short delay
-            self.after(500, self.auto_start_break)  # Start after 0.5 seconds
+            self.after(500, self.auto_start_break)
         else:
-            print("DEBUG: No break slot provided")
             self.break_info_label.configure(text="Time for your break!")
     
     def auto_start_break(self) -> None:

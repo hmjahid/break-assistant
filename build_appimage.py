@@ -72,23 +72,17 @@ Categories=Utility;Office;
     icon_dir = appdir / "usr" / "share" / "icons" / "hicolor" / "256x256" / "apps"
     icon_dir.mkdir(parents=True, exist_ok=True)
     
-    # Create a simple placeholder icon
-    icon_content = """<?xml version="1.0" encoding="UTF-8"?>
-<svg width="256" height="256" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" fill="#4CAF50"/>
-  <text x="128" y="128" text-anchor="middle" dy=".3em" fill="white" font-size="48" font-family="Arial">BA</text>
-</svg>
-"""
-    
-    # Save SVG icon
-    with open(icon_dir / "break-assistant.svg", "w") as f:
-        f.write(icon_content)
-    
+    # --- Removed SVG icon creation code ---
+    # Only use user-provided PNG icon
+
     # Copy PNG icon to AppDir root (required by appimagetool)
     icon_source = "break-assistant.png"
     if os.path.exists(icon_source):
         shutil.copy(icon_source, appdir / "break-assistant.png")
-        print("✓ Custom icon copied to AppDir")
+        print("✓ Custom icon copied to AppDir root")
+        # Also copy to standard icon directory for desktop integration
+        shutil.copy(icon_source, icon_dir / "break-assistant.png")
+        print("✓ Custom icon copied to usr/share/icons/hicolor/256x256/apps/")
     else:
         print(f"ERROR: {icon_source} not found. Please provide the icon in the project root.")
         return False
