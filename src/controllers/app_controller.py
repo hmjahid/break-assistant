@@ -18,7 +18,7 @@ class AppController:
         # Initialize managers
         self.settings_manager = SettingsManager()
         self.timeline_manager = TimelineManager()
-        self.audio_manager = AudioManager()
+        self.audio_manager = AudioManager(self.settings_manager)
         self.theme_manager = ThemeManager()
         self.platform_utils = PlatformUtils()
         

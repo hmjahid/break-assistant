@@ -86,6 +86,16 @@ Categories=Utility;Office;
     else:
         print(f"ERROR: {icon_source} not found. Please provide the icon in the project root.")
         return False
+
+    # Copy src/audio directory to AppDir
+    audio_src = Path("src/audio")
+    audio_dst = appdir / "resources" / "audio"
+    if audio_src.exists():
+        shutil.copytree(audio_src, audio_dst, dirs_exist_ok=True)
+        print("✓ Audio resources copied to AppDir")
+    else:
+        print(f"ERROR: {audio_src} not found. Please provide the audio resources.")
+        return False
     
     # Create AppRun script
     apprun_content = """#!/bin/bash

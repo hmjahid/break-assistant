@@ -238,12 +238,16 @@ class MainWindow(ctk.CTk):
         # Stop current timer if running
         if self.timer_running:
             self.stop_timer()
-        
-        # Get break duration from settings
         settings = self.controller.get_settings()
         break_duration = settings.get('break_duration', 5)
         break_message = settings.get('break_message', 'Time for a break!')
-        
+        # Show system notification if enabled
+        if settings.get('system_notifications', True):
+            from src.utils.platform import PlatformUtils
+            PlatformUtils.show_system_notification("Break Assistant", break_message)
+        # Play sound if enabled
+        if settings.get('sound_enabled', True):
+            self.controller.play_notification_sound()
         # Show break popup with dynamic details
         self.show_break_now_popup(break_duration, break_message)
     
@@ -330,33 +334,26 @@ class MainWindow(ctk.CTk):
     def open_settings(self) -> None:
         """Open settings dialog."""
         try:
-            # Ensure main window is visible and focused
             self.deiconify()
             self.lift()
             self.focus_force()
-            
             from src.settings_page import SettingsPage
-            
             settings_window = ctk.CTkToplevel(self)
             settings_window.title("Settings")
-            settings_window.geometry("600x500")
             settings_window.transient(self)
-            
-            # Center the window
+            width = 500
+            height = 500
+            settings_window.geometry(f"{width}x{height}")
             settings_window.update_idletasks()
-            x = (settings_window.winfo_screenwidth() // 2) - (600 // 2)
-            y = (settings_window.winfo_screenheight() // 2) - (500 // 2)
-            settings_window.geometry(f"600x500+{x}+{y}")
-            
-            # Make modal after positioning
+            x = (settings_window.winfo_screenwidth() // 2) - (width // 2)
+            y = (settings_window.winfo_screenheight() // 2) - (height // 2)
+            settings_window.geometry(f"{width}x{height}+{x}+{y}")
             try:
                 settings_window.grab_set()
             except Exception as e:
                 print(f"Warning: Could not make settings window modal: {e}")
-            
             settings_page = SettingsPage(settings_window, self.controller)
             settings_page.pack(fill="both", expand=True, padx=20, pady=20)
-            
         except Exception as e:
             print(f"Error opening settings: {e}")
             import tkinter.messagebox as messagebox
