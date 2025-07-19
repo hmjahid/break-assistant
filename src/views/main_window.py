@@ -299,25 +299,24 @@ class MainWindow(ctk.CTk):
                         break_slot, occurrence_time = next_break
                         self.current_break_slot = break_slot
                         self.next_break_time = occurrence_time
-                        
                         # Update next break display
                         time_str = occurrence_time.strftime("%H:%M")
+                        # Ensure scheduled attribute is present for timeline breaks
+                        if not hasattr(break_slot, 'scheduled'):
+                            break_slot.scheduled = True
+                        label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
                         self.next_break_label.configure(
-                            text=f"Next break: {time_str} ({break_slot.duration}min)"
+                            text=f"Next break: {time_str} ({break_slot.duration}min {label_type})"
                         )
-                        
                         # Check if it's time for the break
                         now = datetime.now()
                         if now >= occurrence_time:
                             self.controller.show_break_notification(break_slot, occurrence_time)
-                    
                     time.sleep(30)  # Check every 30 seconds
                     self.after(0, self.refresh_next_break_label)
-                    
                 except Exception as e:
                     print(f"Timeline monitor error: {e}")
                     time.sleep(60)  # Wait longer on error
-        
         monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
         monitor_thread.start()
     
@@ -326,8 +325,12 @@ class MainWindow(ctk.CTk):
         if next_break:
             break_slot, occurrence_time = next_break
             time_str = occurrence_time.strftime("%H:%M")
+            # Ensure scheduled attribute is present for timeline breaks
+            if not hasattr(break_slot, 'scheduled'):
+                break_slot.scheduled = True
+            label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
             self.next_break_label.configure(
-                text=f"Next break: {time_str} ({break_slot.duration}min)"
+                text=f"Next break: {time_str} ({break_slot.duration}min {label_type})"
             )
         else:
             self.next_break_label.configure(text="No breaks scheduled")

@@ -82,8 +82,10 @@ cp requirements.txt $RPM_BUILD_ROOT/usr/share/break-assistant/
 cp README.md $RPM_BUILD_ROOT/usr/share/break-assistant/
 cp -r docs $RPM_BUILD_ROOT/usr/share/break-assistant/
 
-# Copy icon
-cp break-assistant.png $RPM_BUILD_ROOT/usr/share/icons/hicolor/256x256/apps/break-assistant.png
+# Copy icon to RPM package icons directory
+icons_dir = os.path.join(rpm_build_dir, 'usr', 'share', 'icons', 'hicolor', '256x256', 'apps')
+os.makedirs(icons_dir, exist_ok=True)
+shutil.copy('break-assistant.png', os.path.join(icons_dir, 'break-assistant.png'))
 
 # Create launcher script
 cat > $RPM_BUILD_ROOT/usr/bin/break-assistant << 'EOF'

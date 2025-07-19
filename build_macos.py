@@ -59,8 +59,8 @@ def build_app_bundle():
     """Build macOS app bundle using PyInstaller."""
     print("🔨 Building macOS app bundle...")
     
-    # PyInstaller command
-    cmd = [
+    # Use the new icon.icns for PyInstaller
+    pyinstaller_cmd = [
         "pyinstaller",
         "--onefile",
         "--windowed",
@@ -74,7 +74,7 @@ def build_app_bundle():
     ]
     
     try:
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(pyinstaller_cmd, check=True, capture_output=True, text=True)
         print("✅ App bundle built successfully")
         return True
     except subprocess.CalledProcessError as e:

@@ -532,6 +532,18 @@ A: You can export your timeline as a JSON file from the settings panel. This fil
 **Q: Can I share my timeline with others?**
 A: Timeline sharing functionality will be available in future versions. Currently, you can manually share the exported JSON file.
 
+### Window Behavior
+- **Always on Top**: If enabled in settings, the main window will stay above all others and this will apply immediately on app startup, no need to re-save settings.
+
+### Break Popup
+- The popup now always shows a **Break Again** button after a break ends, which is always enabled and restarts the break timer for both manual and scheduled breaks.
+
+### Next Break Display
+- The main page's next break label always shows whether the next break is 'scheduled' or 'default'.
+
+### Auto-start Next Session
+- If enabled in Preferences, the work timer will only start after you close the break popup (Skip/Close), not automatically when the break ends.
+
 ---
 
 *For additional support, visit our [GitHub repository](https://github.com/hmjahid/break-assistant) or contact our support team.* 

@@ -33,11 +33,35 @@ A world-class cross-platform break reminder application designed to help users m
 
 ### Installation
 
-#### Linux (AppImage)
+**Linux:**
 ```bash
-# Download and run AppImage
+# AppImage
 chmod +x Break-Assistant-1.0.0-x86_64.AppImage
 ./Break-Assistant-1.0.0-x86_64.AppImage
+
+# DEB package
+sudo dpkg -i break-assistant_1.0.0_amd64.deb
+
+# RPM package
+sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm
+```
+
+**Windows:**
+```bash
+# Executable
+Break-Assistant-1.0.0.exe
+
+# MSI Installer
+msiexec /i Break-Assistant-1.0.0.msi
+```
+
+**macOS:**
+```bash
+# App Bundle
+# Drag 'Break Assistant.app' to Applications folder
+
+# DMG Installer
+# Double-click Break-Assistant-1.0.0.dmg
 ```
 
 #### From Source

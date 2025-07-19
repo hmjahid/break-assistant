@@ -47,8 +47,8 @@ def build_executable():
     """Build Windows executable using PyInstaller."""
     print("🔨 Building Windows executable...")
     
-    # PyInstaller command
-    cmd = [
+    # Use the new icon.ico for PyInstaller
+    pyinstaller_cmd = [
         "pyinstaller",
         "--onefile",
         "--windowed",
@@ -62,7 +62,7 @@ def build_executable():
     ]
     
     try:
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(pyinstaller_cmd, check=True, capture_output=True, text=True)
         print("✅ Executable built successfully")
         return True
     except subprocess.CalledProcessError as e:
