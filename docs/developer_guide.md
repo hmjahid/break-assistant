@@ -280,12 +280,12 @@ python src/main.py
 #### Linux
 ```bash
 # Create AppImage
-pyinstaller --onefile --windowed --name="Break Assistant" src/main.py
+python build_appimage.py
 
-# Create Debian package
+# Create Debian package (to be implemented)
 python setup.py bdist_deb
 
-# Create RPM package
+# Create RPM package (to be implemented)
 python setup.py bdist_rpm
 ```
 

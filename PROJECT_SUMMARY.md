@@ -134,17 +134,17 @@ break-assistant/
 ## 🛠️ Build System
 
 ### Build Scripts Available
-- **build_appimage.py**: Simple AppImage creation
-- **build/build_all.py**: Cross-platform build system
-- **build/linux/build_linux.py**: Linux-specific builds
-- **build/windows/build_windows.py**: Windows builds
-- **build/macos/build_macos.py**: macOS builds
+- **build_appimage.py**: Simple AppImage creation (✅ Working)
+- **build/build_all.py**: Cross-platform build system (🚧 Planned)
+- **build/linux/build_linux.py**: Linux-specific builds (🚧 Planned)
+- **build/windows/build_windows.py**: Windows builds (🚧 Planned)
+- **build/macos/build_macos.py**: macOS builds (🚧 Planned)
 
 ### Package Types
-- **AppImage**: Linux distribution format
-- **EXE**: Windows executable
-- **DMG**: macOS installer
-- **Source**: Python package distribution
+- **AppImage**: Linux distribution format (✅ Working)
+- **EXE**: Windows executable (🚧 Planned)
+- **DMG**: macOS installer (🚧 Planned)
+- **Source**: Python package distribution (✅ Working)
 
 ## 📚 Documentation
 

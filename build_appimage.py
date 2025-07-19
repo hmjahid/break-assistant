@@ -45,17 +45,12 @@ Categories=Utility;Office;
     with open(appdir / "break-assistant.desktop", "w") as f:
         f.write(desktop_content)
     
-    # Build with PyInstaller
+    # Build with PyInstaller using spec file
     pyinstaller_cmd = [
         "pyinstaller",
-        "--onefile",
-        "--windowed",
-        "--name=break-assistant",
         "--distpath", str(appdir),
         "--workpath", str(build_dir / "build"),
-        "--specpath", str(build_dir),
-        "--hidden-import=src.settings_page",
-        "src/main.py"
+        str(build_dir / "break-assistant.spec")
     ]
     
     if not run_command(" ".join(pyinstaller_cmd)):

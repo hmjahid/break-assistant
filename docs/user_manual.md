@@ -114,7 +114,7 @@ The Timeline interface is the heart of Break Assistant's advanced scheduling sys
 
 #### Step 3: Configure Duration
 - **Duration**: Set break length in minutes (1-120)
-- **Default**: 15 minutes
+- **Default**: 15 minutes (manual break duration)
 - **Maximum**: 120 minutes (2 hours)
 
 #### Step 4: Add Message (Optional)
@@ -199,6 +199,17 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 1. Click the "Settings" button in the main interface
 2. Settings panel opens with various configuration options
 
+### Manual Break Duration
+- **Purpose**: Set the duration for manual breaks triggered by "Break Now" button
+- **Default**: 15 minutes
+- **Range**: 1-120 minutes
+- **Usage**: This duration is used when you click "Break Now" instead of scheduled breaks
+
+### Work and Break Durations
+- **Work Duration**: Default 20 minutes for work sessions
+- **Break Duration**: Default 1 minute for scheduled breaks
+- **Customization**: Adjust these values in the settings panel
+
 ### Theme Settings
 
 #### Available Themes
@@ -281,6 +292,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 #### Notification Content
 - **Break Time**: When the break is scheduled
 - **Duration**: How long the break should last
+- **Countdown Timer**: Real-time countdown of break duration
+- **Next Break Time**: Shows when the next break will occur
 - **Message**: Custom message (if set)
 - **Actions**: Snooze, skip, or start break options
 

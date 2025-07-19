@@ -131,11 +131,11 @@ class MainWindow(ctk.CTk):
         """Setup timer functionality."""
         settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
         try:
-            work_duration_raw = settings.get('work_duration', 25)
+            work_duration_raw = settings.get('work_duration', 20)
             print(f"DEBUG: work_duration value: {work_duration_raw}, type: {type(work_duration_raw)}")
             work_duration = int(work_duration_raw)
         except (ValueError, TypeError):
-            work_duration = 25
+            work_duration = 20
         self.timer_duration = work_duration * 60  # in seconds
         self.timer_remaining = self.timer_duration
         self.timer_start_time = None
@@ -239,7 +239,8 @@ class MainWindow(ctk.CTk):
         if self.timer_running:
             self.stop_timer()
         settings = self.controller.get_settings()
-        break_duration = settings.get('break_duration', 5)
+        # Use manual break duration for "Break Now" button
+        break_duration = settings.get('manual_break_duration', 15)
         break_message = settings.get('break_message', 'Time for a break!')
         # Show system notification if enabled
         if settings.get('system_notifications', True):
@@ -368,17 +369,24 @@ class MainWindow(ctk.CTk):
             preferences_window = ctk.CTkToplevel(self)
             preferences_window.title("Preferences")
             preferences_window.transient(self)
-            preferences_page = PreferencesPage(preferences_window, self.controller)
-            preferences_page.pack(fill="both", expand=True, padx=20, pady=20)
-            preferences_window.update_idletasks()
+            
+            # Set initial size to ensure all content is visible
             width = 500
-            content_height = preferences_page.winfo_reqheight() + 60
-            height = max(content_height, 500)
+            height = 590  # Increased height to accommodate all content
+            preferences_window.geometry(f"{width}x{height}")
+            preferences_window.minsize(width, 590)  # Minimum height
+            preferences_window.resizable(True, True)
+            
+            # Center the window
+            preferences_window.update_idletasks()
             x = (preferences_window.winfo_screenwidth() // 2) - (width // 2)
             y = (preferences_window.winfo_screenheight() // 2) - (height // 2)
             preferences_window.geometry(f"{width}x{height}+{x}+{y}")
-            preferences_window.minsize(width, 500)
-            preferences_window.resizable(True, True)
+            
+            # Create and pack the preferences page
+            preferences_page = PreferencesPage(preferences_window, self.controller)
+            preferences_page.pack(fill="both", expand=True, padx=20, pady=20)
+            
             try:
                 preferences_window.grab_set()
             except Exception as e:

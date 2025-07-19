@@ -10,7 +10,7 @@ class BreakPopup(ctk.CTkToplevel):
         super().__init__(master)
         self.controller = controller
         self.title("Break Time!")
-        self.geometry("500x500")  # Increased height from 400 to 500
+        self.geometry("500x510")  # Increased height by 10px from 500 to 510
         self.resizable(False, False)
         
         # Make modal but don't grab immediately
@@ -19,8 +19,8 @@ class BreakPopup(ctk.CTkToplevel):
         # Center the window
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (500 // 2)
-        y = (self.winfo_screenheight() // 2) - (500 // 2)  # Updated for new height
-        self.geometry(f"500x500+{x}+{y}")  # Updated height
+        y = (self.winfo_screenheight() // 2) - (510 // 2)  # Updated for new height
+        self.geometry(f"500x510+{x}+{y}")  # Updated height
         
         # Make visible first, then grab
         self.deiconify()
@@ -88,6 +88,11 @@ class BreakPopup(ctk.CTkToplevel):
                                          font=ctk.CTkFont(size=12))
         self.end_time_label.pack(pady=5)
         
+        # Next break time calculation
+        self.next_break_label = ctk.CTkLabel(time_frame, text="Next break: --:--", 
+                                           font=ctk.CTkFont(size=12))
+        self.next_break_label.pack(pady=5)
+        
         # Buttons frame
         button_frame = ctk.CTkFrame(main_frame)
         button_frame.pack(pady=15, fill="x", padx=20)  # Reduced pady from 20 to 15
@@ -129,9 +134,60 @@ class BreakPopup(ctk.CTkToplevel):
                 )
             self.break_remaining = break_slot.duration * 60
             self.update_timer_display()
+            
+            # Calculate and display next break time
+            self.calculate_next_break_time()
+            
             self.after(500, self.auto_start_break)
         else:
             self.break_info_label.configure(text="Time for your break!")
+    
+    def calculate_next_break_time(self) -> None:
+        """Calculate and display the next break time."""
+        try:
+            from datetime import datetime, timedelta
+            
+            # Get current time
+            now = datetime.now()
+            
+            # Get settings for default durations
+            settings = self.controller.get_settings()
+            work_duration = settings.get('work_duration', 20)
+            break_duration = settings.get('break_duration', 1)
+            
+            # Calculate default next break time (current time + work duration)
+            default_next_break = now + timedelta(minutes=work_duration)
+            
+            # Check if there's a scheduled break that's closer
+            next_scheduled_break = None
+            try:
+                next_scheduled_break = self.controller.get_next_break()
+            except Exception as e:
+                print(f"DEBUG: Error getting next scheduled break: {e}")
+            
+            # Determine which break time to use
+            if next_scheduled_break:
+                scheduled_slot, scheduled_time = next_scheduled_break
+                # Use scheduled break if it's closer than default
+                if scheduled_time < default_next_break:
+                    next_break_time = scheduled_time
+                    next_break_text = f"Next break: {scheduled_time.strftime('%H:%M')} ({scheduled_slot.duration}min scheduled)"
+                else:
+                    next_break_time = default_next_break
+                    next_break_text = f"Next break: {default_next_break.strftime('%H:%M')} ({break_duration}min default)"
+            else:
+                next_break_time = default_next_break
+                next_break_text = f"Next break: {default_next_break.strftime('%H:%M')} ({break_duration}min default)"
+            
+            # Update the label
+            if hasattr(self, 'next_break_label') and self.next_break_label.winfo_exists():
+                self.next_break_label.configure(text=next_break_text)
+                print(f"DEBUG: Next break time calculated: {next_break_text}")
+            
+        except Exception as e:
+            print(f"DEBUG: Error calculating next break time: {e}")
+            if hasattr(self, 'next_break_label') and self.next_break_label.winfo_exists():
+                self.next_break_label.configure(text="Next break: --:--")
     
     def auto_start_break(self) -> None:
         """Automatically start the break timer when popup opens."""

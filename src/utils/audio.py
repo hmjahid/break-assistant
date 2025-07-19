@@ -14,9 +14,23 @@ class AudioManager:
     def get_resource_path(self, relative_path: str) -> str:
         # Handle PyInstaller/AppImage resource extraction
         if hasattr(sys, '_MEIPASS'):
-            base_path = os.path.join(sys._MEIPASS, 'audio')
-            resolved = os.path.abspath(os.path.join(base_path, relative_path))
-            print(f"[AUDIO DEBUG] (MEIPASS) Resolved path: {resolved}")
+            # Try multiple possible locations for audio files
+            possible_paths = [
+                os.path.join(sys._MEIPASS, 'audio'),
+                os.path.join(sys._MEIPASS, 'resources', 'audio'),
+                os.path.join(sys._MEIPASS, 'src', 'audio')
+            ]
+            
+            for base_path in possible_paths:
+                resolved = os.path.abspath(os.path.join(base_path, relative_path))
+                print(f"[AUDIO DEBUG] Trying path: {resolved}")
+                if os.path.exists(resolved):
+                    print(f"[AUDIO DEBUG] Found file at: {resolved}")
+                    return resolved
+            
+            # If not found in any location, return the first one for debugging
+            resolved = os.path.abspath(os.path.join(possible_paths[0], relative_path))
+            print(f"[AUDIO DEBUG] (MEIPASS) Final path: {resolved}")
             return resolved
         else:
             base_path = os.path.dirname(__file__)

@@ -8,12 +8,14 @@ A world-class cross-platform break reminder application designed to help users m
 
 ### Core Functionality
 - **Smart Break Scheduling**: Custom timeline-based break scheduling with repeat patterns
-- **Customizable Intervals**: Set break duration and frequency to match your workflow
+- **Manual Break Duration**: Set custom break duration (default: 15 minutes)
+- **Customizable Intervals**: Set work duration (default: 20 minutes) and break duration (default: 1 minute)
 - **Snooze & Skip**: Flexible break management with snooze and skip options
 - **Sound Alerts**: Customizable notification sounds for break reminders
 - **Theme Support**: Light, Dark, and System theme options
 - **Progress Visualization**: Real-time progress bars and visual indicators
 - **Settings Persistence**: Automatic saving of user preferences and timeline
+- **Break Popup**: Enhanced break notification with countdown and next break time
 
 ### Advanced Timeline Management
 - **Multiple Break Slots**: Define unlimited break times throughout the day
@@ -96,9 +98,10 @@ break-assistant/
 │   ├── controllers/        # Application controllers
 │   ├── models/            # Data models
 │   ├── views/             # UI components
-│   └── utils/             # Utility modules
+│   ├── utils/             # Utility modules
+│   └── audio/             # Audio resources
 ├── tests/                 # Test suite
-├── build/                 # Build scripts
+├── build_appimage/        # AppImage build files
 ├── docs/                  # Documentation
 └── resources/             # Assets and resources
 ```
@@ -130,22 +133,19 @@ python src/main.py
 
 #### Linux AppImage
 ```bash
-python build/linux/build_linux.py
+python build_appimage.py
 ```
 
 #### Windows Executable
 ```bash
-python build/windows/build_windows.py
+# Windows build script (to be implemented)
+python build_windows.py
 ```
 
 #### macOS DMG
 ```bash
-python build/macos/build_macos.py
-```
-
-#### All Platforms
-```bash
-python build/build_all.py
+# macOS build script (to be implemented)
+python build_macos.py
 ```
 
 ## 🧪 Testing
