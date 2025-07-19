@@ -1,0 +1,19 @@
+Package: break-assistant
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: python3 (>= 3.8), python3-tk, python3-pygame
+Maintainer: Break Assistant Team <support@breakassistant.app>
+Description: Smart break reminder application
+ Break Assistant is a world-class cross-platform break reminder 
+ application designed to help users maintain healthy work habits 
+ through smart break scheduling and customizable notifications.
+ .
+ Features:
+  * Smart break scheduling with timeline management
+  * Customizable work and break durations
+  * Sound alerts and theme support
+  * Cross-platform compatibility
+  * Progress visualization
+Homepage: https://github.com/hmjahid/break-assistant

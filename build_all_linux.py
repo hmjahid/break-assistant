@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import shutil
+import platform
 from pathlib import Path
 
 def run_command(cmd, cwd=None):
@@ -99,6 +100,32 @@ def build_rpm():
         print(f"❌ RPM package file not found at: {rpm_file}")
         return False
 
+def build_windows():
+    """Build Windows packages."""
+    print("\n" + "="*50)
+    print("Building Windows packages...")
+    print("="*50)
+    
+    if not run_command("python build_windows.py"):
+        print("❌ Windows build failed")
+        return False
+    
+    print("✅ Windows packages built successfully")
+    return True
+
+def build_macos():
+    """Build macOS packages."""
+    print("\n" + "="*50)
+    print("Building macOS packages...")
+    print("="*50)
+    
+    if not run_command("python build_macos.py"):
+        print("❌ macOS build failed")
+        return False
+    
+    print("✅ macOS packages built successfully")
+    return True
+
 def main():
     """Main function."""
     print("Building all Break Assistant packages...")
@@ -126,6 +153,18 @@ def main():
     if build_rpm():
         success_count += 1
     
+    # Build Windows (if on Windows)
+    if platform.system() == "Windows":
+        total_count += 1
+        if build_windows():
+            success_count += 1
+    
+    # Build macOS (if on macOS)
+    if platform.system() == "Darwin":
+        total_count += 1
+        if build_macos():
+            success_count += 1
+    
     # Summary
     print("\n" + "="*50)
     print("BUILD SUMMARY")
@@ -139,6 +178,14 @@ def main():
         print("- break-assistant_1.0.0_amd64.deb (Debian/Ubuntu)")
         print("- break-assistant-1.0.0-1.fc41.noarch.rpm (Fedora/RHEL)")
         
+        if platform.system() == "Windows":
+            print("- Break-Assistant-1.0.0.exe (Windows Executable)")
+            print("- Break-Assistant-1.0.0.msi (Windows Installer)")
+        
+        if platform.system() == "Darwin":
+            print("- Break Assistant.app (macOS App Bundle)")
+            print("- Break-Assistant-1.0.0.dmg (macOS Installer)")
+        
         print("\nInstallation commands:")
         print("# AppImage:")
         print("chmod +x Break-Assistant-1.0.0-x86_64.AppImage")
@@ -147,6 +194,16 @@ def main():
         print("sudo dpkg -i break-assistant_1.0.0_amd64.deb")
         print("\n# RPM package:")
         print("sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm")
+        
+        if platform.system() == "Windows":
+            print("\n# Windows:")
+            print("Double-click Break-Assistant-1.0.0.exe")
+            print("Or: msiexec /i Break-Assistant-1.0.0.msi")
+        
+        if platform.system() == "Darwin":
+            print("\n# macOS:")
+            print("Drag 'Break Assistant.app' to Applications")
+            print("Or: Double-click Break-Assistant-1.0.0.dmg")
         
         return 0
     else:

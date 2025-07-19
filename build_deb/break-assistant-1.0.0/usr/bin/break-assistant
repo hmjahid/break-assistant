@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /usr/share/break-assistant
+exec python3 main.py "$@"

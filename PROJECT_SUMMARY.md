@@ -73,11 +73,13 @@ break-assistant/
 │   ├── unit/              # Unit tests
 │   ├── integration/       # Integration tests
 │   └── ui/               # UI tests
-├── build/                 # Build scripts
-│   ├── build_all.py
-│   ├── windows/
-│   ├── linux/
-│   └── macos/
+├── build_appimage/        # AppImage build files
+├── build_all_linux.py     # Unified Linux build system
+├── build_appimage.py      # Linux AppImage
+├── build_deb.py           # Linux DEB package
+├── build_rpm_final.py     # Linux RPM package
+├── build_windows.py       # Windows executable/MSI
+├── build_macos.py         # macOS app bundle/DMG
 ├── docs/                  # Documentation
 │   ├── user_manual.md     # ✅ Comprehensive user guide
 │   ├── developer_guide.md
@@ -134,16 +136,21 @@ break-assistant/
 ## 🛠️ Build System
 
 ### Build Scripts Available
-- **build_all.py**: Unified build system for all packages (✅ Working)
+- **build_all_linux.py**: Unified build system for all Linux packages (✅ Working)
 - **build_appimage.py**: Linux AppImage creation (✅ Working)
 - **build_deb.py**: Debian package creation (✅ Working)
 - **build_rpm_final.py**: RPM package creation (✅ Working)
-- **build_rpm.py**: Alternative RPM build script (✅ Working)
+- **build_windows.py**: Windows executable and installer (✅ Working)
+- **build_macos.py**: macOS app bundle and DMG (✅ Working)
 
 ### Package Types
 - **AppImage**: Linux distribution format (✅ Working)
 - **DEB**: Debian/Ubuntu package format (✅ Working)
 - **RPM**: Fedora/RHEL package format (✅ Working)
+- **EXE**: Windows executable format (✅ Working)
+- **MSI**: Windows installer format (✅ Working)
+- **APP**: macOS app bundle format (✅ Working)
+- **DMG**: macOS installer format (✅ Working)
 - **Source**: Python package distribution (✅ Working)
 
 ### Build Features

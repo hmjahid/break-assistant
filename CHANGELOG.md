@@ -17,14 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cross-platform compatibility
 - Comprehensive test suite
 - Documentation (User Manual, Developer Guide, API Reference)
-- **Enhanced Build System**: Complete Linux packaging support
+- **Enhanced Build System**: Complete cross-platform packaging support
   - AppImage creation with PyInstaller integration
   - DEB package creation with automatic copying
   - RPM package creation with system integration
-  - Unified build script (`build_all.py`) for all packages
+  - Windows executable and MSI installer creation
+  - macOS app bundle and DMG installer creation
+  - Unified build script (`build_all.py`) for all platforms
   - Automatic package copying to current directory
   - Enhanced logging and error handling
   - Dependency detection and installation
+  - Platform detection and cross-platform builds
 
 ### Changed
 - N/A
@@ -125,7 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+Please read our [Developer Guide](docs/developer_guide.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 

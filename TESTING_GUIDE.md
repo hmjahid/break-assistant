@@ -277,11 +277,11 @@ python src/main.py
 
 ## Build Testing
 
-### 1. Test All Packages
+### 1. Test All Linux Packages
 
 ```bash
-# Build all packages
-python build_all.py
+# Build all Linux packages
+python build_all_linux.py
 
 # Verify packages exist
 ls -la *.AppImage *.deb *.rpm
@@ -321,6 +321,36 @@ rpm -qip break-assistant-1.0.0-1.fc41.noarch.rpm
 
 # Test installation (optional)
 sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm
+```
+
+#### Windows Package Testing
+```bash
+# Build Windows packages
+python build_windows.py
+
+# Verify Windows executable
+file Break-Assistant-1.0.0.exe
+
+# Test Windows executable
+Break-Assistant-1.0.0.exe
+
+# Test Windows installer (if available)
+msiexec /i Break-Assistant-1.0.0.msi
+```
+
+#### macOS Package Testing
+```bash
+# Build macOS packages
+python build_macos.py
+
+# Verify macOS app bundle
+file "Break Assistant.app"
+
+# Test macOS app bundle
+open "Break Assistant.app"
+
+# Test macOS DMG (if available)
+open Break-Assistant-1.0.0.dmg
 ```
 
 ### 3. Test Build Features
