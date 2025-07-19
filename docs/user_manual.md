@@ -359,15 +359,11 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 
 ### Data Management
 
-#### Export Timeline
-- **Format**: JSON file export
+#### Timeline Persistence
+- **Format**: JSON file storage
 - **Content**: All break slots and settings
-- **Purpose**: Backup or transfer to another device
-
-#### Import Timeline
-- **Format**: JSON file import
-- **Validation**: System validates imported data
-- **Merge**: Option to merge with existing timeline
+- **Purpose**: Automatic backup of timeline data
+- **Location**: Stored in user configuration directory
 
 #### Reset Timeline
 - **Function**: Clear all break slots
