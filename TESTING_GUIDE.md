@@ -277,33 +277,77 @@ python src/main.py
 
 ## Build Testing
 
-### 1. Test Build Scripts
+### 1. Test All Packages
 
 ```bash
-# Test Windows build
-python build/windows/build_windows.py
+# Build all packages
+python build_all.py
 
-# Test Linux build
-python build/linux/build_linux.py
-
-# Test macOS build
-python build/macos/build_macos.py
-
-# Test all platforms
-python build/build_all.py
+# Verify packages exist
+ls -la *.AppImage *.deb *.rpm
 ```
 
-### 2. Test Package Creation
+### 2. Test Individual Build Scripts
 
+#### AppImage Testing
 ```bash
-# Test PyInstaller
-pyinstaller --onefile --windowed src/main.py
+# Build AppImage
+python build_appimage.py
 
-# Test package installation
-pip install -e .
+# Test AppImage
+chmod +x Break-Assistant-1.0.0-x86_64.AppImage
+./Break-Assistant-1.0.0-x86_64.AppImage
+```
 
-# Test application entry point
-break-assistant
+#### DEB Package Testing
+```bash
+# Build DEB package
+python build_deb.py
+
+# Verify DEB package
+dpkg -I break-assistant_1.0.0_amd64.deb
+
+# Test installation (optional)
+sudo dpkg -i break-assistant_1.0.0_amd64.deb
+```
+
+#### RPM Package Testing
+```bash
+# Build RPM package
+python build_rpm_final.py
+
+# Verify RPM package
+rpm -qip break-assistant-1.0.0-1.fc41.noarch.rpm
+
+# Test installation (optional)
+sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm
+```
+
+### 3. Test Build Features
+
+#### Package Copying
+```bash
+# Verify packages are copied to current directory
+ls -la *.AppImage *.deb *.rpm
+
+# Check copy locations in build logs
+python build_all.py | grep "copied to"
+```
+
+#### Error Handling
+```bash
+# Test with missing dependencies
+# (Remove rpmbuild temporarily)
+sudo mv /usr/bin/rpmbuild /usr/bin/rpmbuild.bak
+python build_rpm_final.py
+sudo mv /usr/bin/rpmbuild.bak /usr/bin/rpmbuild
+```
+
+#### Logging Verification
+```bash
+# Check for detailed logging
+python build_all.py | grep "Current directory"
+python build_all.py | grep "copied to"
 ```
 
 ### 3. Test Dependencies

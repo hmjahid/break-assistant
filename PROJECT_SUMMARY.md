@@ -134,17 +134,24 @@ break-assistant/
 ## 🛠️ Build System
 
 ### Build Scripts Available
-- **build_appimage.py**: Simple AppImage creation (✅ Working)
-- **build/build_all.py**: Cross-platform build system (🚧 Planned)
-- **build/linux/build_linux.py**: Linux-specific builds (🚧 Planned)
-- **build/windows/build_windows.py**: Windows builds (🚧 Planned)
-- **build/macos/build_macos.py**: macOS builds (🚧 Planned)
+- **build_all.py**: Unified build system for all packages (✅ Working)
+- **build_appimage.py**: Linux AppImage creation (✅ Working)
+- **build_deb.py**: Debian package creation (✅ Working)
+- **build_rpm_final.py**: RPM package creation (✅ Working)
+- **build_rpm.py**: Alternative RPM build script (✅ Working)
 
 ### Package Types
 - **AppImage**: Linux distribution format (✅ Working)
-- **EXE**: Windows executable (🚧 Planned)
-- **DMG**: macOS installer (🚧 Planned)
+- **DEB**: Debian/Ubuntu package format (✅ Working)
+- **RPM**: Fedora/RHEL package format (✅ Working)
 - **Source**: Python package distribution (✅ Working)
+
+### Build Features
+- **Automatic Package Copying**: All packages copied to current directory
+- **Enhanced Logging**: Detailed build progress and copy locations
+- **Error Handling**: Comprehensive error reporting with file paths
+- **Dependency Management**: Automatic tool detection and installation
+- **Cross-Platform**: Linux packaging with system integration
 
 ## 📚 Documentation
 

@@ -277,17 +277,43 @@ python src/main.py
 
 ### Production Build
 
-#### Linux
+#### All Packages (Recommended)
+```bash
+# Build all package types (AppImage, DEB, RPM)
+python build_all.py
+```
+
+#### Individual Package Types
+
+##### Linux AppImage
 ```bash
 # Create AppImage
 python build_appimage.py
-
-# Create Debian package (to be implemented)
-python setup.py bdist_deb
-
-# Create RPM package (to be implemented)
-python setup.py bdist_rpm
 ```
+
+##### Linux DEB Package
+```bash
+# Create Debian package
+python build_deb.py
+```
+
+##### Linux RPM Package
+```bash
+# Create RPM package
+python build_rpm_final.py
+```
+
+#### Package Output
+All built packages are automatically copied to the current directory:
+- **AppImage**: `Break-Assistant-1.0.0-x86_64.AppImage`
+- **DEB**: `break-assistant_1.0.0_amd64.deb`
+- **RPM**: `break-assistant-1.0.0-1.fc41.noarch.rpm`
+
+#### Build Features
+- **Automatic Package Copying**: All packages copied to current directory
+- **Enhanced Logging**: Detailed build progress and copy locations
+- **Error Handling**: Comprehensive error reporting with file paths
+- **Dependency Management**: Automatic tool detection and installation
 
 #### Windows
 ```bash

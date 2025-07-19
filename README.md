@@ -131,21 +131,46 @@ python src/main.py
 
 ### Building Packages
 
-#### Linux AppImage
+#### All Packages (Recommended)
+```bash
+# Build all package types (AppImage, DEB, RPM)
+python build_all.py
+```
+
+#### Individual Package Types
+
+##### Linux AppImage
 ```bash
 python build_appimage.py
 ```
 
-#### Windows Executable
+##### Linux DEB Package
 ```bash
-# Windows build script (to be implemented)
-python build_windows.py
+python build_deb.py
 ```
 
-#### macOS DMG
+##### Linux RPM Package
 ```bash
-# macOS build script (to be implemented)
-python build_macos.py
+python build_rpm_final.py
+```
+
+#### Package Output
+All built packages are automatically copied to the current directory:
+- **AppImage**: `Break-Assistant-1.0.0-x86_64.AppImage`
+- **DEB**: `break-assistant_1.0.0_amd64.deb`
+- **RPM**: `break-assistant-1.0.0-1.fc41.noarch.rpm`
+
+#### Installation Commands
+```bash
+# AppImage
+chmod +x Break-Assistant-1.0.0-x86_64.AppImage
+./Break-Assistant-1.0.0-x86_64.AppImage
+
+# DEB package
+sudo dpkg -i break-assistant_1.0.0_amd64.deb
+
+# RPM package
+sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm
 ```
 
 ## 🧪 Testing
