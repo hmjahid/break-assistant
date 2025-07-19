@@ -59,6 +59,8 @@ Break Assistant is a sophisticated break reminder application designed to help y
 
 When you first launch Break Assistant, you'll see the main interface with:
 
+![Main Interface](images/main-interface.png)
+
 - **Timer Display**: Shows current session time
 - **Progress Bar**: Visual indicator of session progress
 - **Control Buttons**: Start, stop, and reset timer
@@ -113,6 +115,8 @@ The Timeline interface is the heart of Break Assistant's advanced scheduling sys
 1. Click the "Timeline" button in the main interface
 2. The timeline window opens showing your current break schedule
 
+![Timeline Interface](images/timeline-interface.png)
+
 ### Adding Break Slots
 
 #### Step 1: Click "Add Break"
@@ -146,6 +150,8 @@ Choose from four repeat patterns:
 - Click "Save" to add the break to your timeline
 - The break appears in the timeline list
 - Break slots are automatically sorted by time
+
+![Add Break Dialog](images/add-break-dialog.png)
 
 ### Editing Break Slots
 
@@ -211,6 +217,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 1. Click the "Settings" button in the main interface
 2. Settings panel opens with various configuration options
 
+![Settings Interface](images/settings-interface.png)
+
 ### Manual Break Duration
 - **Purpose**: Set the duration for manual breaks triggered by "Break Now" button
 - **Default**: 15 minutes
@@ -234,6 +242,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 2. Select your preferred theme
 3. Theme applies immediately
 4. Setting is saved automatically
+
+![Theme Selection](images/theme-selection.png)
 
 ### Sound Settings
 
@@ -295,6 +305,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 ## Advanced Features
 
 ### Break Notifications
+
+![Break Notification](images/break-popup.png)
 
 #### Notification Types
 - **Sound Alert**: Audio notification when break is due
@@ -526,4 +538,4 @@ A: Timeline sharing functionality will be available in future versions. Currentl
 
 ---
 
-*For additional support, visit our [GitHub repository](https://github.com/your-username/break-assistant) or contact our support team.* 
+*For additional support, visit our [GitHub repository](https://github.com/hmjahid/break-assistant) or contact our support team.* 

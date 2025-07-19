@@ -2,6 +2,8 @@
 
 A world-class cross-platform break reminder application designed to help users maintain healthy work habits through smart break scheduling and customizable notifications.
 
+![Break Assistant Interface](docs/images/main-interface.png)
+
 ## 🌟 Features
 
 ### Core Functionality
@@ -108,11 +110,18 @@ break-assistant/
 ├── build_appimage.py      # Linux AppImage
 ├── build_deb.py           # Linux DEB package
 ├── build_rpm_final.py     # Linux RPM package
+├── build_rpm.py           # Alternative RPM build
+├── build_rpm_simple.py    # Simple RPM build
 ├── build_windows.py       # Windows executable/MSI
 ├── build_macos.py         # macOS app bundle/DMG
 ├── requirements.txt        # Python dependencies
 ├── pyproject.toml         # Project configuration
-└── setup.py               # Package setup
+├── setup.py               # Package setup
+├── break-assistant.spec   # RPM spec file
+├── test_app.py            # Test application
+├── debug_settings.py      # Debug configuration
+├── create_icon.py         # Icon creation utility
+└── roadmap.txt            # Development roadmap
 ```
 
 ### Development Setup
@@ -282,8 +291,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 ### Getting Help
-- **Issues**: [GitHub Issues](https://github.com/your-username/break-assistant/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/break-assistant/discussions)
+- **Issues**: [GitHub Issues](https://github.com/hmjahid/break-assistant/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/hmjahid/break-assistant/discussions)
 - **Documentation**: [Wiki](https://github.com/hmjahid/break-assistant/wiki)
 
 ### Reporting Bugs
