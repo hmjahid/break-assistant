@@ -244,7 +244,7 @@ class MainWindow(ctk.CTk):
         break_message = settings.get('break_message', 'Time for a break!')
         # Show system notification if enabled
         if settings.get('system_notifications', True):
-            from src.utils.platform import PlatformUtils
+            from utils.platform import PlatformUtils
             PlatformUtils.show_system_notification("Break Assistant", break_message)
         # Play sound if enabled
         if settings.get('sound_enabled', True):
@@ -254,7 +254,7 @@ class MainWindow(ctk.CTk):
     
     def show_break_now_popup(self, break_duration: int, break_message: str) -> None:
         """Show break popup with dynamic details."""
-        from src.views.break_popup import BreakPopup
+        from views.break_popup import BreakPopup
         
         # Create break slot for the popup
         class BreakSlot:
@@ -271,7 +271,7 @@ class MainWindow(ctk.CTk):
     
     def show_break_notification(self) -> None:
         """Show break notification."""
-        from src.views.break_popup import BreakPopup
+        from views.break_popup import BreakPopup
         
         # Get break duration from settings
         settings = self.controller.get_settings()
@@ -305,14 +305,28 @@ class MainWindow(ctk.CTk):
                         if not hasattr(break_slot, 'scheduled'):
                             break_slot.scheduled = True
                         label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
-                        self.next_break_label.configure(
-                            text=f"Next break: {time_str} ({break_slot.duration}min {label_type})"
-                        )
-                        # Check if it's time for the break
+                        
+                        # Check if the break is today or tomorrow
                         now = datetime.now()
+                        if occurrence_time.date() == now.date():
+                            date_str = "Today"
+                        elif occurrence_time.date() == now.date() + timedelta(days=1):
+                            date_str = "Tomorrow"
+                        else:
+                            date_str = occurrence_time.strftime("%Y-%m-%d")
+                        
+                        display_text = f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                        self.next_break_label.configure(text=display_text)
+                        
+                        # Check if it's time for the break
                         if now >= occurrence_time:
                             self.controller.show_break_notification(break_slot, occurrence_time)
-                    time.sleep(30)  # Check every 30 seconds
+                    else:
+                        # No breaks scheduled
+                        self.next_break_label.configure(text="No breaks scheduled")
+                    
+                    # Refresh the display every 10 seconds instead of 30
+                    time.sleep(10)
                     self.after(0, self.refresh_next_break_label)
                 except Exception as e:
                     print(f"Timeline monitor error: {e}")
@@ -320,20 +334,64 @@ class MainWindow(ctk.CTk):
         monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
         monitor_thread.start()
     
+    def force_refresh_next_break(self) -> None:
+        """Force an immediate refresh of the next break label."""
+        try:
+            next_break = self.controller.get_next_break()
+            if next_break:
+                break_slot, occurrence_time = next_break
+                time_str = occurrence_time.strftime("%H:%M")
+                # Ensure scheduled attribute is present for timeline breaks
+                if not hasattr(break_slot, 'scheduled'):
+                    break_slot.scheduled = True
+                label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
+                
+                # Check if the break is today or tomorrow
+                now = datetime.now()
+                if occurrence_time.date() == now.date():
+                    date_str = "Today"
+                elif occurrence_time.date() == now.date() + timedelta(days=1):
+                    date_str = "Tomorrow"
+                else:
+                    date_str = occurrence_time.strftime("%Y-%m-%d")
+                
+                display_text = f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                self.next_break_label.configure(text=display_text)
+                print(f"DEBUG: Force refreshed next break label: {display_text}")
+            else:
+                self.next_break_label.configure(text="No breaks scheduled")
+                print("DEBUG: Force refreshed - no breaks scheduled")
+        except Exception as e:
+            print(f"DEBUG: Error in force_refresh_next_break: {e}")
+    
     def refresh_next_break_label(self):
-        next_break = self.controller.get_next_break()
-        if next_break:
-            break_slot, occurrence_time = next_break
-            time_str = occurrence_time.strftime("%H:%M")
-            # Ensure scheduled attribute is present for timeline breaks
-            if not hasattr(break_slot, 'scheduled'):
-                break_slot.scheduled = True
-            label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
-            self.next_break_label.configure(
-                text=f"Next break: {time_str} ({break_slot.duration}min {label_type})"
-            )
-        else:
-            self.next_break_label.configure(text="No breaks scheduled")
+        """Refresh the next break label (called by timeline monitor)."""
+        try:
+            next_break = self.controller.get_next_break()
+            if next_break:
+                break_slot, occurrence_time = next_break
+                time_str = occurrence_time.strftime("%H:%M")
+                # Ensure scheduled attribute is present for timeline breaks
+                if not hasattr(break_slot, 'scheduled'):
+                    break_slot.scheduled = True
+                label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
+                
+                # Check if the break is today or tomorrow
+                now = datetime.now()
+                if occurrence_time.date() == now.date():
+                    date_str = "Today"
+                elif occurrence_time.date() == now.date() + timedelta(days=1):
+                    date_str = "Tomorrow"
+                else:
+                    date_str = occurrence_time.strftime("%Y-%m-%d")
+                
+                self.next_break_label.configure(
+                    text=f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                )
+            else:
+                self.next_break_label.configure(text="No breaks scheduled")
+        except Exception as e:
+            print(f"DEBUG: Error in refresh_next_break_label: {e}")
     
     def open_settings(self) -> None:
         """Open settings dialog."""
@@ -341,7 +399,7 @@ class MainWindow(ctk.CTk):
             self.deiconify()
             self.lift()
             self.focus_force()
-            from src.settings_page import SettingsPage
+            from settings_page import SettingsPage
             settings_window = ctk.CTkToplevel(self)
             settings_window.title("Settings")
             settings_window.transient(self)
@@ -368,7 +426,7 @@ class MainWindow(ctk.CTk):
             self.deiconify()
             self.lift()
             self.focus_force()
-            from src.views.preferences_page import PreferencesPage
+            from views.preferences_page import PreferencesPage
             preferences_window = ctk.CTkToplevel(self)
             preferences_window.title("Preferences")
             preferences_window.transient(self)
@@ -407,7 +465,7 @@ class MainWindow(ctk.CTk):
             self.lift()
             self.focus_force()
             
-            from src.views.timeline_page import TimelinePage
+            from views.timeline_page import TimelinePage
             
             timeline_window = ctk.CTkToplevel(self)
             timeline_window.title("Custom Break Timeline")
@@ -442,7 +500,7 @@ class MainWindow(ctk.CTk):
             self.lift()
             self.focus_force()
             
-            from src.views.about_page import AboutPage
+            from views.about_page import AboutPage
             
             about_window = ctk.CTkToplevel(self)
             about_window.title("About Break Assistant")
@@ -486,7 +544,7 @@ class MainWindow(ctk.CTk):
             self.deiconify()
             self.lift()
             self.focus_force()
-            from src.views.help_page import HelpPage
+            from views.help_page import HelpPage
             help_window = ctk.CTkToplevel(self)
             help_window.title("Help & Support")
             help_window.geometry("600x600")

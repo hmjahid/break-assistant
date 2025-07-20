@@ -604,3 +604,9 @@ stats.print_stats()
 ---
 
 *Last updated: Version 1.0.0* 
+
+## Settings Application
+- The 'Always on Top' setting is now applied to the main window immediately after it is created in AppController, ensuring persistence across restarts.
+
+## Break Popup Thread Safety
+- All UI updates in the break popup are now guarded with winfo_exists() checks to prevent TclError if the popup is closed while the timer thread is running. 

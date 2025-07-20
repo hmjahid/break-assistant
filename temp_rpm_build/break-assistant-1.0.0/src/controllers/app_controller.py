@@ -1,9 +1,9 @@
-from src.views.main_window import MainWindow
-from src.models.timeline_manager import TimelineManager
-from src.models.settings import SettingsManager
-from src.utils.audio import AudioManager
-from src.utils.themes import ThemeManager
-from src.utils.platform import PlatformUtils
+from views.main_window import MainWindow
+from models.timeline_manager import TimelineManager
+from models.settings import SettingsManager
+from utils.audio import AudioManager
+from utils.themes import ThemeManager
+from utils.platform import PlatformUtils
 from datetime import datetime, timedelta
 import logging
 
@@ -97,12 +97,16 @@ class AppController:
     def get_next_break(self) -> tuple:
         """Get the next break from timeline, or fallback to default if none scheduled."""
         current_datetime = datetime.now()
+        
         next_break = self.timeline_manager.get_next_break(current_datetime)
+        
         if next_break:
             return next_break
+        
         # Fallback: use default work/break duration from settings
         work_duration = self.settings_manager.get("work_duration", 25)
         break_duration = self.settings_manager.get("break_duration", 5)
+        
         class PseudoBreakSlot:
             def __init__(self, duration):
                 self.duration = duration
@@ -126,7 +130,7 @@ class AppController:
             break_slot: Break slot that triggered
             occurrence_time: When the break should occur
         """
-        from src.views.break_popup import BreakPopup
+        from views.break_popup import BreakPopup
         
         # Play sound
         self.play_notification_sound()
