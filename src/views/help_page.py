@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from src.models.settings import SettingsManager
 
 class HelpPage(ctk.CTkFrame):
     """Help page view."""

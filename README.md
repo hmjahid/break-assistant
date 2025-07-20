@@ -1,5 +1,7 @@
 # Break Assistant
 
+**NOTICE:** This project is licensed for personal, non-commercial use only under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license. Commercial use is strictly prohibited. See the LICENSE file for details.
+
 A world-class cross-platform break reminder application designed to help users maintain healthy work habits through smart break scheduling and customizable notifications.
 
 ![Break Assistant Interface](docs/images/main-interface.png)

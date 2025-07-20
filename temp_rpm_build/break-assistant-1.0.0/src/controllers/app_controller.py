@@ -1,9 +1,9 @@
-from views.main_window import MainWindow
-from models.timeline_manager import TimelineManager
-from models.settings import SettingsManager
-from utils.audio import AudioManager
-from utils.themes import ThemeManager
-from utils.platform import PlatformUtils
+from src.views.main_window import MainWindow
+from src.models.timeline_manager import TimelineManager
+from src.models.settings import SettingsManager
+from src.utils.audio import AudioManager
+from src.utils.themes import ThemeManager
+from src.utils.platform import PlatformUtils
 from datetime import datetime, timedelta
 import logging
 
@@ -130,7 +130,7 @@ class AppController:
             break_slot: Break slot that triggered
             occurrence_time: When the break should occur
         """
-        from views.break_popup import BreakPopup
+        from src.views.break_popup import BreakPopup
         
         # Play sound
         self.play_notification_sound()

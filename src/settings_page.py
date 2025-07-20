@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from typing import Optional
+from src.models.settings import SettingsManager
 
 class SettingsPage(ctk.CTkFrame):
     """Settings interface view."""

@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from typing import Optional, List, Callable
-from models.timeline_manager import TimelineManager, BreakSlot
+from src.models.timeline_manager import TimelineManager, BreakSlot
 from datetime import datetime, time
 import tkinter.messagebox as messagebox
 

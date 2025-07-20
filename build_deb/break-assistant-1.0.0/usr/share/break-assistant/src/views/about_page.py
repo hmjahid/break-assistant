@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import platform
 import sys
+from src.models.settings import SettingsManager
 
 class AboutPage(ctk.CTkFrame):
     """About page view."""
@@ -86,11 +87,21 @@ Built with:
                                     wraplength=400,  # Reduced from 500 to 400
                                     justify="left")
         credits_label.grid(row=6, column=0, pady=(0, 20), padx=30, sticky="ew")
-        
+
+        # License section
+        license_title = ctk.CTkLabel(self.scrollable, text="License", font=ctk.CTkFont(size=16, weight="bold"))
+        license_title.grid(row=7, column=0, pady=(0, 5), padx=20, sticky="w")
+        license_text = (
+            "This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license.\n"
+            "\nPersonal, non-commercial use only. Commercial use is strictly prohibited.\n"
+            "See the LICENSE file or https://creativecommons.org/licenses/by-nc/4.0/ for details."
+        )
+        license_label = ctk.CTkLabel(self.scrollable, text=license_text, font=ctk.CTkFont(size=13), wraplength=400, justify="left")
+        license_label.grid(row=8, column=0, pady=(0, 20), padx=20, sticky="ew")
+
         # Close button
-        close_button = ctk.CTkButton(self.scrollable, text="Close", 
-                                    command=self.master.destroy, width=120)
-        close_button.grid(row=7, column=0, pady=(10, 30))
+        close_button = ctk.CTkButton(self.scrollable, text="Close", command=self.master.destroy, width=120)
+        close_button.grid(row=9, column=0, pady=(10, 30))
     
     def bind_all_mousewheel(self):
         """Bind mouse wheel events for scrolling."""

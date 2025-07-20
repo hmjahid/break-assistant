@@ -235,6 +235,8 @@ class MainWindow(ctk.CTk):
     
     def start_break_now(self) -> None:
         """Start a break immediately."""
+        # Track if timer was running before manual break
+        self._resume_work_after_manual_break = self.timer_running
         # Stop current timer if running
         if self.timer_running:
             self.stop_timer()
@@ -244,7 +246,7 @@ class MainWindow(ctk.CTk):
         break_message = settings.get('break_message', 'Time for a break!')
         # Show system notification if enabled
         if settings.get('system_notifications', True):
-            from utils.platform import PlatformUtils
+            from src.utils.platform import PlatformUtils
             PlatformUtils.show_system_notification("Break Assistant", break_message)
         # Play sound if enabled
         if settings.get('sound_enabled', True):
@@ -254,7 +256,7 @@ class MainWindow(ctk.CTk):
     
     def show_break_now_popup(self, break_duration: int, break_message: str) -> None:
         """Show break popup with dynamic details."""
-        from views.break_popup import BreakPopup
+        from src.views.break_popup import BreakPopup
         
         # Create break slot for the popup
         class BreakSlot:
@@ -263,15 +265,17 @@ class MainWindow(ctk.CTk):
                 self.message = message
         
         break_slot = BreakSlot(break_duration, break_message)
+        break_slot.manual = True
         
-        # Show popup
+        # Show popup, pass resume_work_after_manual_break flag
         popup = BreakPopup(self, self.controller)
+        popup._resume_work_after_manual_break = getattr(self, '_resume_work_after_manual_break', False)
         popup.set_break_info(break_slot, None)
         # Popup is already visible from __init__
     
     def show_break_notification(self) -> None:
         """Show break notification."""
-        from views.break_popup import BreakPopup
+        from src.views.break_popup import BreakPopup
         
         # Get break duration from settings
         settings = self.controller.get_settings()
@@ -399,7 +403,7 @@ class MainWindow(ctk.CTk):
             self.deiconify()
             self.lift()
             self.focus_force()
-            from settings_page import SettingsPage
+            from src.settings_page import SettingsPage
             settings_window = ctk.CTkToplevel(self)
             settings_window.title("Settings")
             settings_window.transient(self)
@@ -426,7 +430,7 @@ class MainWindow(ctk.CTk):
             self.deiconify()
             self.lift()
             self.focus_force()
-            from views.preferences_page import PreferencesPage
+            from src.views.preferences_page import PreferencesPage
             preferences_window = ctk.CTkToplevel(self)
             preferences_window.title("Preferences")
             preferences_window.transient(self)
@@ -465,7 +469,7 @@ class MainWindow(ctk.CTk):
             self.lift()
             self.focus_force()
             
-            from views.timeline_page import TimelinePage
+            from src.views.timeline_page import TimelinePage
             
             timeline_window = ctk.CTkToplevel(self)
             timeline_window.title("Custom Break Timeline")
@@ -500,7 +504,7 @@ class MainWindow(ctk.CTk):
             self.lift()
             self.focus_force()
             
-            from views.about_page import AboutPage
+            from src.views.about_page import AboutPage
             
             about_window = ctk.CTkToplevel(self)
             about_window.title("About Break Assistant")
@@ -544,7 +548,7 @@ class MainWindow(ctk.CTk):
             self.deiconify()
             self.lift()
             self.focus_force()
-            from views.help_page import HelpPage
+            from src.views.help_page import HelpPage
             help_window = ctk.CTkToplevel(self)
             help_window.title("Help & Support")
             help_window.geometry("600x600")

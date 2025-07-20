@@ -12,42 +12,42 @@ def test_imports():
     print("Testing imports...")
     
     try:
-        from models.timeline_manager import TimelineManager, BreakSlot
+        from src.models.timeline_manager import TimelineManager, BreakSlot
         print("✓ TimelineManager imported successfully")
     except Exception as e:
         print(f"✗ TimelineManager import failed: {e}")
         return False
     
     try:
-        from models.settings import SettingsManager
+        from src.models.settings import SettingsManager
         print("✓ SettingsManager imported successfully")
     except Exception as e:
         print(f"✗ SettingsManager import failed: {e}")
         return False
     
     try:
-        from models.timer import Timer
+        from src.models.timer import Timer
         print("✓ Timer imported successfully")
     except Exception as e:
         print(f"✗ Timer import failed: {e}")
         return False
     
     try:
-        from utils.audio import AudioManager
+        from src.utils.audio import AudioManager
         print("✓ AudioManager imported successfully")
     except Exception as e:
         print(f"✗ AudioManager import failed: {e}")
         return False
     
     try:
-        from utils.themes import ThemeManager
+        from src.utils.themes import ThemeManager
         print("✓ ThemeManager imported successfully")
     except Exception as e:
         print(f"✗ ThemeManager import failed: {e}")
         return False
     
     try:
-        from utils.platform import PlatformUtils
+        from src.utils.platform import PlatformUtils
         print("✓ PlatformUtils imported successfully")
     except Exception as e:
         print(f"✗ PlatformUtils import failed: {e}")
@@ -60,7 +60,7 @@ def test_timeline_manager():
     print("\nTesting TimelineManager...")
     
     try:
-        from models.timeline_manager import TimelineManager, BreakSlot
+        from src.models.timeline_manager import TimelineManager, BreakSlot
         from datetime import time
         
         # Create timeline manager
@@ -92,7 +92,7 @@ def test_settings_manager():
     print("\nTesting SettingsManager...")
     
     try:
-        from models.settings import SettingsManager
+        from src.models.settings import SettingsManager
         
         # Create settings manager
         settings = SettingsManager()
@@ -123,7 +123,7 @@ def test_timer():
     print("\nTesting Timer...")
     
     try:
-        from models.timer import Timer
+        from src.models.timer import Timer
         
         # Create timer
         timer = Timer(60)
@@ -143,7 +143,7 @@ def test_audio_manager():
     print("\nTesting AudioManager...")
     
     try:
-        from utils.audio import AudioManager
+        from src.utils.audio import AudioManager
         
         # Create audio manager
         audio = AudioManager()
@@ -162,7 +162,7 @@ def test_platform_utils():
     print("\nTesting PlatformUtils...")
     
     try:
-        from utils.platform import PlatformUtils
+        from src.utils.platform import PlatformUtils
         
         # Create platform utils
         platform = PlatformUtils()
@@ -181,7 +181,7 @@ def test_theme_manager():
     print("\nTesting ThemeManager...")
     
     try:
-        from utils.themes import ThemeManager
+        from src.utils.themes import ThemeManager
         
         # Create theme manager
         theme = ThemeManager()

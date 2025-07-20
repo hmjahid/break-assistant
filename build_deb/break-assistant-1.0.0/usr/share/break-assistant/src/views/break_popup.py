@@ -2,6 +2,7 @@ import customtkinter as ctk
 from datetime import datetime, timedelta
 import threading
 import time
+from src.models.settings import SettingsManager
 
 class BreakPopup(ctk.CTkToplevel):
     """Break notification popup."""
@@ -320,17 +321,33 @@ class BreakPopup(ctk.CTkToplevel):
         # Always enable Break Again button
 
     def skip_break(self):
-        """Skip the break and start work timer if auto start is enabled and not manual break."""
+        """Skip the break and start work timer if auto start is enabled and not manual break. For manual break, resume work timer only if it was running before."""
         self.break_timer_running = False
         self.destroy()
-        if not getattr(self.break_slot, 'manual', False) and self.should_auto_start():
+        if getattr(self.break_slot, 'manual', False):
+            # Resume work timer only if it was running before
+            if getattr(self, '_resume_work_after_manual_break', False):
+                if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
+                    try:
+                        self.controller.main_window.start_timer()
+                    except Exception as e:
+                        print(f"DEBUG: Could not resume work timer after manual break: {e}")
+        elif self.should_auto_start():
             self.start_work_timer()
 
     def close_break(self):
-        """Close the popup and start work timer if auto start is enabled and not manual break."""
+        """Close the popup and start work timer if auto start is enabled and not manual break. For manual break, resume work timer only if it was running before."""
         self.break_timer_running = False
         self.destroy()
-        if not getattr(self.break_slot, 'manual', False) and self.should_auto_start():
+        if getattr(self.break_slot, 'manual', False):
+            # Resume work timer only if it was running before
+            if getattr(self, '_resume_work_after_manual_break', False):
+                if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
+                    try:
+                        self.controller.main_window.start_timer()
+                    except Exception as e:
+                        print(f"DEBUG: Could not resume work timer after manual break: {e}")
+        elif self.should_auto_start():
             self.start_work_timer()
 
     def should_auto_start(self):
