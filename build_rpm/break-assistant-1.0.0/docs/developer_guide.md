@@ -277,35 +277,90 @@ python src/main.py
 
 ### Production Build
 
-#### Linux
+#### All Linux Packages (Recommended)
+```bash
+# Build all Linux package types (AppImage, DEB, RPM)
+python build_all_linux.py
+```
+
+#### Individual Package Types
+
+##### Linux AppImage
 ```bash
 # Create AppImage
 python build_appimage.py
-
-# Create Debian package (to be implemented)
-python setup.py bdist_deb
-
-# Create RPM package (to be implemented)
-python setup.py bdist_rpm
 ```
 
-#### Windows
+##### Linux DEB Package
 ```bash
-# Create executable
-pyinstaller --onefile --windowed --icon=resources/icons/icon.ico --name="Break Assistant" src/main.py
-
-# Create MSI installer
-python setup.py bdist_msi
+# Create Debian package
+python build_deb.py
 ```
 
-#### macOS
+##### Linux RPM Package
 ```bash
-# Create app bundle
-pyinstaller --onefile --windowed --icon=resources/icons/icon.icns --name="Break Assistant" src/main.py
-
-# Create DMG
-python setup.py bdist_dmg
+# Create RPM package
+python build_rpm_final.py
 ```
+
+##### Windows Executable & Installer
+```bash
+# Create Windows packages
+python build_windows.py
+```
+
+##### macOS App Bundle & DMG
+```bash
+# Create macOS packages
+python build_macos.py
+```
+
+#### Package Output
+All built packages are automatically copied to the current directory:
+
+**Linux Packages:**
+- **AppImage**: `Break-Assistant-1.0.0-x86_64.AppImage`
+- **DEB**: `break-assistant_1.0.0_amd64.deb`
+- **RPM**: `break-assistant-1.0.0-1.fc41.noarch.rpm`
+
+**Windows Packages:**
+- **Executable**: `Break-Assistant-1.0.0.exe`
+- **Installer**: `Break-Assistant-1.0.0.msi` (requires cx_Freeze)
+
+**macOS Packages:**
+- **App Bundle**: `Break Assistant.app`
+- **DMG**: `Break-Assistant-1.0.0.dmg` (requires create-dmg)
+
+#### Build Features
+- **Automatic Package Copying**: All packages copied to current directory
+- **Enhanced Logging**: Detailed build progress and copy locations
+- **Error Handling**: Comprehensive error reporting with file paths
+- **Dependency Management**: Automatic tool detection and installation
+- **Cross-Platform Support**: Windows, macOS, and Linux builds
+- **Platform Detection**: Automatic platform-specific builds
+
+#### Build Requirements
+
+**Windows Requirements:**
+- Windows 10+ operating system
+- Python 3.8+
+- PyInstaller: `pip install pyinstaller`
+- cx_Freeze (optional): `pip install cx_Freeze`
+- Windows icon: `resources/icons/icon.ico`
+
+**macOS Requirements:**
+- macOS 10.14+ operating system
+- Python 3.8+
+- PyInstaller: `pip install pyinstaller`
+- create-dmg (optional): `brew install create-dmg`
+- macOS icon: `resources/icons/icon.icns`
+
+**Linux Requirements:**
+- Linux distribution (Ubuntu, Fedora, etc.)
+- Python 3.8+
+- PyInstaller: `pip install pyinstaller`
+- rpmbuild (for RPM): `sudo dnf install rpm-build`
+- dpkg-deb (for DEB): `sudo apt install dpkg-dev`
 
 ### CI/CD Pipeline
 
@@ -549,3 +604,9 @@ stats.print_stats()
 ---
 
 *Last updated: Version 1.0.0* 
+
+## Settings Application
+- The 'Always on Top' setting is now applied to the main window immediately after it is created in AppController, ensuring persistence across restarts.
+
+## Break Popup Thread Safety
+- All UI updates in the break popup are now guarded with winfo_exists() checks to prevent TclError if the popup is closed while the timer thread is running. 

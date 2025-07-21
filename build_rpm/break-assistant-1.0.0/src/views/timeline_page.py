@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from typing import Optional, Callable
-from datetime import time
+from typing import Optional, List, Callable
 from src.models.timeline_manager import TimelineManager, BreakSlot
+from datetime import datetime, time
+import tkinter.messagebox as messagebox
 
 
 class TimelinePage(ctk.CTkFrame):
@@ -11,7 +12,8 @@ class TimelinePage(ctk.CTkFrame):
         print("DEBUG: Entering TimelinePage.__init__")
         super().__init__(master)
         self.controller = controller
-        self.timeline_manager = TimelineManager()
+        # Use the controller's timeline manager instead of creating a new one
+        self.timeline_manager = controller.get_timeline_manager()
         self.selected_slot: Optional[BreakSlot] = None
         self.setup_ui()
         self.bind_all_mousewheel()
@@ -89,6 +91,9 @@ class TimelinePage(ctk.CTkFrame):
     
     def refresh_timeline(self) -> None:
         """Refresh the timeline display."""
+        # Store the currently selected slot ID
+        selected_id = self.selected_slot.id if self.selected_slot else None
+        
         # Clear existing items
         for widget in self.timeline_scroll.winfo_children():
             widget.destroy()
@@ -96,6 +101,13 @@ class TimelinePage(ctk.CTkFrame):
         # Add timeline items
         for slot in self.timeline_manager.get_all_break_slots():
             self.add_timeline_item(slot)
+        
+        # Restore selection if it still exists
+        if selected_id:
+            for slot in self.timeline_manager.get_all_break_slots():
+                if slot.id == selected_id:
+                    self.select_slot(slot)
+                    break
         
         # Update details
         self.update_details()
@@ -140,10 +152,10 @@ class TimelinePage(ctk.CTkFrame):
         # Mouse hover highlight
         def on_enter(e, frame=item_frame):
             if self.selected_slot != slot:
-                frame.configure(fg_color=("gray90", "gray20"))
+                frame.configure(fg_color=("lightblue", "darkblue"))
         def on_leave(e, frame=item_frame):
             if self.selected_slot == slot:
-                frame.configure(fg_color=("gray85", "gray35"))
+                frame.configure(fg_color=("lightgreen", "darkgreen"))
             else:
                 frame.configure(fg_color=("gray75", "gray25"))
         item_frame.bind("<Enter>", on_enter)
@@ -168,7 +180,7 @@ class TimelinePage(ctk.CTkFrame):
         # Select new
         for widget in self.timeline_scroll.winfo_children():
             if hasattr(widget, 'slot') and widget.slot == slot:
-                widget.configure(fg_color=("gray85", "gray35"))
+                widget.configure(fg_color=("lightgreen", "darkgreen"))
                 break
         
         self.selected_slot = slot
@@ -217,8 +229,8 @@ ID: {slot.id}"""
             self.timeline_manager.add_break_slot(start_time, duration, message, repeat_pattern)
             self.refresh_timeline()
             if hasattr(self.controller, 'main_window_ref'):
-                print("DEBUG: Calling main_window_ref.refresh_next_break_label() after add_break_slot")
-                self.controller.main_window_ref.refresh_next_break_label()
+                print("DEBUG: Calling main_window_ref.force_refresh_next_break() after add_break_slot")
+                self.controller.main_window_ref.force_refresh_next_break()
         except ValueError as e:
             self.show_error("Error", str(e))
     
@@ -236,8 +248,8 @@ ID: {slot.id}"""
             )
             self.refresh_timeline()
             if hasattr(self.controller, 'main_window_ref'):
-                print("DEBUG: Calling main_window_ref.refresh_next_break_label() after edit_break_slot")
-                self.controller.main_window_ref.refresh_next_break_label()
+                print("DEBUG: Calling main_window_ref.force_refresh_next_break() after edit_break_slot")
+                self.controller.main_window_ref.force_refresh_next_break()
         except ValueError as e:
             self.show_error("Error", str(e))
     
@@ -253,8 +265,8 @@ ID: {slot.id}"""
             self.delete_button.configure(state="disabled")
             self.refresh_timeline()
             if hasattr(self.controller, 'main_window_ref'):
-                print("DEBUG: Calling main_window_ref.refresh_next_break_label() after delete_selected_slot")
-                self.controller.main_window_ref.refresh_next_break_label()
+                print("DEBUG: Calling main_window_ref.force_refresh_next_break() after delete_selected_slot")
+                self.controller.main_window_ref.force_refresh_next_break()
     
     def validate_timeline(self) -> None:
         """Validate the timeline and display results."""
@@ -295,7 +307,24 @@ ID: {slot.id}"""
         dialog.title(title)
         dialog.geometry("400x200")
         dialog.transient(self)
-        dialog.after(10, lambda: dialog.grab_set())  # Use after to avoid grab error
+        
+        # Center the dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (400 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (200 // 2)
+        dialog.geometry(f"400x200+{x}+{y}")
+        
+        # Make visible first, then grab
+        dialog.deiconify()
+        dialog.lift()
+        dialog.focus_force()
+        
+        # Try to grab after a short delay to ensure window is visible
+        try:
+            dialog.after(100, dialog.grab_set)
+        except Exception as e:
+            print(f"Warning: Could not grab confirmation dialog: {e}")
+        
         label = ctk.CTkLabel(dialog, text=message, wraplength=350)
         label.pack(expand=True, fill="both", padx=20, pady=20)
         button_frame = ctk.CTkFrame(dialog)

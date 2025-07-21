@@ -1,8 +1,10 @@
 # Break Assistant
 
+**NOTICE:** This project is licensed for personal, non-commercial use only under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license. Commercial use is strictly prohibited. See the LICENSE file for details.
+
 A world-class cross-platform break reminder application designed to help users maintain healthy work habits through smart break scheduling and customizable notifications.
 
-![Break Assistant](docs/images/break-assistant-screenshot.png)
+![Break Assistant Interface](docs/images/main-interface.png)
 
 ## 🌟 Features
 
@@ -33,11 +35,35 @@ A world-class cross-platform break reminder application designed to help users m
 
 ### Installation
 
-#### Linux (AppImage)
+**Linux:**
 ```bash
-# Download and run AppImage
+# AppImage
 chmod +x Break-Assistant-1.0.0-x86_64.AppImage
 ./Break-Assistant-1.0.0-x86_64.AppImage
+
+# DEB package
+sudo dpkg -i break-assistant_1.0.0_amd64.deb
+
+# RPM package
+sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm
+```
+
+**Windows:**
+```bash
+# Executable
+Break-Assistant-1.0.0.exe
+
+# MSI Installer
+msiexec /i Break-Assistant-1.0.0.msi
+```
+
+**macOS:**
+```bash
+# App Bundle
+# Drag 'Break Assistant.app' to Applications folder
+
+# DMG Installer
+# Double-click Break-Assistant-1.0.0.dmg
 ```
 
 #### From Source
@@ -99,11 +125,29 @@ break-assistant/
 │   ├── models/            # Data models
 │   ├── views/             # UI components
 │   ├── utils/             # Utility modules
-│   └── audio/             # Audio resources
+│   ├── audio/             # Audio resources
+│   ├── settings_page.py   # Settings page
+│   └── main.py            # Application entry point
 ├── tests/                 # Test suite
-├── build_appimage/        # AppImage build files
 ├── docs/                  # Documentation
-└── resources/             # Assets and resources
+├── resources/             # Assets and resources
+├── build_appimage/        # AppImage build files
+├── build_all_linux.py     # Linux build system
+├── build_appimage.py      # Linux AppImage
+├── build_deb.py           # Linux DEB package
+├── build_rpm_final.py     # Linux RPM package
+├── build_rpm.py           # Alternative RPM build
+├── build_rpm_simple.py    # Simple RPM build
+├── build_windows.py       # Windows executable/MSI
+├── build_macos.py         # macOS app bundle/DMG
+├── requirements.txt        # Python dependencies
+├── pyproject.toml         # Project configuration
+├── setup.py               # Package setup
+├── break-assistant.spec   # RPM spec file
+├── test_app.py            # Test application
+├── debug_settings.py      # Debug configuration
+├── create_icon.py         # Icon creation utility
+└── roadmap.txt            # Development roadmap
 ```
 
 ### Development Setup
@@ -131,21 +175,86 @@ python src/main.py
 
 ### Building Packages
 
-#### Linux AppImage
+#### All Linux Packages (Recommended)
+```bash
+# Build all Linux package types (AppImage, DEB, RPM)
+python build_all_linux.py
+```
+
+#### Individual Package Types
+
+##### Linux AppImage
 ```bash
 python build_appimage.py
 ```
 
-#### Windows Executable
+##### Linux DEB Package
 ```bash
-# Windows build script (to be implemented)
+python build_deb.py
+```
+
+##### Linux RPM Package
+```bash
+python build_rpm_final.py
+```
+
+##### Windows Executable & Installer
+```bash
 python build_windows.py
 ```
 
-#### macOS DMG
+##### macOS App Bundle & DMG
 ```bash
-# macOS build script (to be implemented)
 python build_macos.py
+```
+
+#### Package Output
+All built packages are automatically copied to the current directory:
+
+**Linux Packages:**
+- **AppImage**: `Break-Assistant-1.0.0-x86_64.AppImage`
+- **DEB**: `break-assistant_1.0.0_amd64.deb`
+- **RPM**: `break-assistant-1.0.0-1.fc41.noarch.rpm`
+
+**Windows Packages:**
+- **Executable**: `Break-Assistant-1.0.0.exe`
+- **Installer**: `Break-Assistant-1.0.0.msi` (requires cx_Freeze)
+
+**macOS Packages:**
+- **App Bundle**: `Break Assistant.app`
+- **DMG**: `Break-Assistant-1.0.0.dmg` (requires create-dmg)
+
+#### Installation Commands
+
+**Linux:**
+```bash
+# AppImage
+chmod +x Break-Assistant-1.0.0-x86_64.AppImage
+./Break-Assistant-1.0.0-x86_64.AppImage
+
+# DEB package
+sudo dpkg -i break-assistant_1.0.0_amd64.deb
+
+# RPM package
+sudo rpm -i break-assistant-1.0.0-1.fc41.noarch.rpm
+```
+
+**Windows:**
+```bash
+# Executable
+Break-Assistant-1.0.0.exe
+
+# MSI Installer
+msiexec /i Break-Assistant-1.0.0.msi
+```
+
+**macOS:**
+```bash
+# App Bundle
+# Drag 'Break Assistant.app' to Applications folder
+
+# DMG Installer
+# Double-click Break-Assistant-1.0.0.dmg
 ```
 
 ## 🧪 Testing
@@ -176,7 +285,7 @@ open htmlcov/index.html  # View report
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Developer Guide](docs/developer_guide.md) for development guidelines.
 
 ### Development Workflow
 1. Fork the repository
@@ -200,14 +309,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **CustomTkinter**: Modern UI framework
 - **Pygame**: Audio functionality
-- **PyInstaller**: Application packaging
+- **PyInstaller**: Cross-platform application packaging
 - **AppImage**: Linux distribution format
+- **cx_Freeze**: Windows MSI installer creation
+- **create-dmg**: macOS DMG installer creation
 
 ## 📞 Support
 
 ### Getting Help
-- **Issues**: [GitHub Issues](https://github.com/your-username/break-assistant/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/break-assistant/discussions)
+- **Issues**: [GitHub Issues](https://github.com/hmjahid/break-assistant/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/hmjahid/break-assistant/discussions)
 - **Documentation**: [Wiki](https://github.com/hmjahid/break-assistant/wiki)
 
 ### Reporting Bugs

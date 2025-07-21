@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from typing import Optional
+from src.models.settings import SettingsManager
 
 class PreferencesPage(ctk.CTkFrame):
     """Preferences interface view - Timer settings only."""
@@ -38,7 +39,7 @@ class PreferencesPage(ctk.CTkFrame):
         
         # Info section
         try:
-            info_label = ctk.CTkLabel(self.scrollable, text="Configure your work/break intervals and timer preferences.\nSettings are saved automatically.", font=ctk.CTkFont(size=13), justify="center", wraplength=500, text_color="gray")
+            info_label = ctk.CTkLabel(self.scrollable, text="Configure your work/break intervals and timer preferences.", font=ctk.CTkFont(size=13), justify="center", wraplength=500, text_color="gray")
             info_label.grid(row=0, column=0, pady=(10, 5), sticky="ew")
         except Exception as e:
             print(f"Error in info_label: {e}")

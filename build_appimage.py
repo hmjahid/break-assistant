@@ -110,11 +110,16 @@ exec ./break-assistant "$@"
     # Check if appimagetool is available
     if not shutil.which("appimagetool"):
         print("appimagetool not found. Installing...")
-        if not run_command("wget -c 'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage' -O appimagetool"):
+        if os.path.exists("appimagetool"):
+            print("Using existing appimagetool")
+            os.chmod("appimagetool", 0o755)
+            appimagetool = "./appimagetool"
+        elif not run_command("wget -c 'https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage' -O appimagetool"):
             print("Failed to download appimagetool")
             return False
-        os.chmod("appimagetool", 0o755)
-        appimagetool = "./appimagetool"
+        else:
+            os.chmod("appimagetool", 0o755)
+            appimagetool = "./appimagetool"
     else:
         appimagetool = "appimagetool"
     

@@ -27,6 +27,13 @@ class AppController:
         
         # Initialize UI
         self.main_window = MainWindow(self)
+        # Apply always on top setting immediately after creating main window
+        always_on_top = self.settings_manager.get('always_on_top', False)
+        if hasattr(self.main_window, 'attributes'):
+            try:
+                self.main_window.attributes('-topmost', always_on_top)
+            except Exception as e:
+                print(f"DEBUG: Could not apply always on top at startup: {e}")
         # Store reference to main window for settings refresh
         self.main_window_ref = self.main_window
         
@@ -90,16 +97,21 @@ class AppController:
     def get_next_break(self) -> tuple:
         """Get the next break from timeline, or fallback to default if none scheduled."""
         current_datetime = datetime.now()
+        
         next_break = self.timeline_manager.get_next_break(current_datetime)
+        
         if next_break:
             return next_break
+        
         # Fallback: use default work/break duration from settings
         work_duration = self.settings_manager.get("work_duration", 25)
         break_duration = self.settings_manager.get("break_duration", 5)
+        
         class PseudoBreakSlot:
             def __init__(self, duration):
                 self.duration = duration
                 self.start_time = current_datetime
+                self.scheduled = False  # Mark as default break
         pseudo_slot = PseudoBreakSlot(break_duration)
         occurrence_time = current_datetime + timedelta(minutes=work_duration)
         return (pseudo_slot, occurrence_time)

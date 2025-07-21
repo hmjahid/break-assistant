@@ -117,6 +117,21 @@ exec python3 main.py "$@"
         shutil.copytree(src_dir, app_dir / "src", dirs_exist_ok=True)
         print("✓ Source files copied")
     
+    # Ensure audio files are in the correct location for the DEB package
+    # The audio manager expects audio files in resources/audio relative to src
+    resources_dir = app_dir / "src" / "resources" / "audio"
+    resources_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Copy audio files to the resources directory
+    audio_src = Path("src/audio")
+    if audio_src.exists():
+        for audio_file in audio_src.glob("*"):
+            if audio_file.is_file():
+                shutil.copy(audio_file, resources_dir / audio_file.name)
+                print(f"✓ Audio file copied: {audio_file.name}")
+    else:
+        print("Warning: src/audio directory not found")
+    
     # Copy requirements
     requirements_file = Path("requirements.txt")
     if requirements_file.exists():

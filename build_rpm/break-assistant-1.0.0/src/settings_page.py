@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from typing import Optional
+from src.models.settings import SettingsManager
 
 class SettingsPage(ctk.CTkFrame):
     """Settings interface view."""
@@ -37,7 +38,7 @@ class SettingsPage(ctk.CTkFrame):
         self.scrollable.bind_all("<MouseWheel>", self._on_mousewheel)
         # Info section
         try:
-            info_label = ctk.CTkLabel(self.scrollable, text="Configure your notifications and appearance settings.\nSettings are saved automatically.", font=ctk.CTkFont(size=13), justify="center", wraplength=500, text_color="gray")
+            info_label = ctk.CTkLabel(self.scrollable, text="Configure your notifications and appearance settings.", font=ctk.CTkFont(size=13), justify="center", wraplength=500, text_color="gray")
             info_label.grid(row=0, column=0, pady=(10, 5), sticky="ew")
         except Exception as e:
             print(f"Error in info_label: {e}")
@@ -132,6 +133,7 @@ class SettingsPage(ctk.CTkFrame):
         self.always_on_top_var = ctk.BooleanVar(value=False)
         on_top_check = ctk.CTkCheckBox(appearance_frame, text="Always on top", variable=self.always_on_top_var)
         on_top_check.grid(row=3, column=0, columnspan=2, padx=15, pady=5, sticky="w")
+        on_top_check.configure(command=self.on_always_on_top_changed)
     
     def create_buttons(self, parent, row):
         buttons_frame = ctk.CTkFrame(parent)
@@ -224,6 +226,12 @@ class SettingsPage(ctk.CTkFrame):
                     if always_on_top is not None:
                         self.always_on_top_var.set(bool(always_on_top))
                         print(f"DEBUG: Set always_on_top to {always_on_top}")
+                        # Apply to main window immediately
+                        if hasattr(self.controller, 'main_window') and self.controller.main_window:
+                            try:
+                                self.controller.main_window.attributes('-topmost', bool(always_on_top))
+                            except Exception as e:
+                                print(f"DEBUG: Could not apply always on top on load: {e}")
                     else:
                         print("DEBUG: Using default always_on_top (False)")
                         self.always_on_top_var.set(False)
@@ -387,3 +395,11 @@ class SettingsPage(ctk.CTkFrame):
     def show_error(self, title: str, message: str) -> None:
         import tkinter.messagebox as messagebox
         messagebox.showerror(title, message) 
+
+    def on_always_on_top_changed(self):
+        value = self.always_on_top_var.get()
+        if hasattr(self.controller, 'main_window') and self.controller.main_window:
+            try:
+                self.controller.main_window.attributes('-topmost', value)
+            except Exception as e:
+                print(f"DEBUG: Could not apply always on top immediately: {e}") 

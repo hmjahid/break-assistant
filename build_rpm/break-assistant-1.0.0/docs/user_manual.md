@@ -34,18 +34,32 @@ Break Assistant is a sophisticated break reminder application designed to help y
 3. Run the application: `./Break-Assistant-1.0.0-x86_64.AppImage`
 
 #### Windows Users
-1. Download the Windows installer (.exe) from the releases page
-2. Run the installer and follow the setup wizard
-3. Launch Break Assistant from the Start menu
+1. **Download**: Get the Windows executable from the releases page
+   - `Break-Assistant-1.0.0.exe` (standalone executable)
+   - `Break-Assistant-1.0.0.msi` (installer package)
+
+2. **Installation Options**:
+   - **Executable**: Double-click `Break-Assistant-1.0.0.exe` to run directly
+   - **Installer**: Run `msiexec /i Break-Assistant-1.0.0.msi` for system installation
+
+3. **Launch**: Start Break Assistant from the Start menu or desktop shortcut
 
 #### macOS Users
-1. Download the DMG file from the releases page
-2. Open the DMG and drag Break Assistant to Applications
-3. Launch from Applications or Spotlight
+1. **Download**: Get the macOS package from the releases page
+   - `Break Assistant.app` (app bundle)
+   - `Break-Assistant-1.0.0.dmg` (installer disk image)
+
+2. **Installation Options**:
+   - **App Bundle**: Drag `Break Assistant.app` to Applications folder
+   - **DMG**: Double-click `Break-Assistant-1.0.0.dmg`, then drag to Applications
+
+3. **Launch**: Open from Applications folder or use Spotlight search
 
 ### First Launch
 
 When you first launch Break Assistant, you'll see the main interface with:
+
+![Main Interface](images/main-interface.png)
 
 - **Timer Display**: Shows current session time
 - **Progress Bar**: Visual indicator of session progress
@@ -101,6 +115,8 @@ The Timeline interface is the heart of Break Assistant's advanced scheduling sys
 1. Click the "Timeline" button in the main interface
 2. The timeline window opens showing your current break schedule
 
+![Timeline Interface](images/timeline-interface.png)
+
 ### Adding Break Slots
 
 #### Step 1: Click "Add Break"
@@ -134,6 +150,8 @@ Choose from four repeat patterns:
 - Click "Save" to add the break to your timeline
 - The break appears in the timeline list
 - Break slots are automatically sorted by time
+
+![Add Break Dialog](images/add-break-dialog.png)
 
 ### Editing Break Slots
 
@@ -199,6 +217,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 1. Click the "Settings" button in the main interface
 2. Settings panel opens with various configuration options
 
+![Settings Interface](images/settings-interface.png)
+
 ### Manual Break Duration
 - **Purpose**: Set the duration for manual breaks triggered by "Break Now" button
 - **Default**: 15 minutes
@@ -222,6 +242,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 2. Select your preferred theme
 3. Theme applies immediately
 4. Setting is saved automatically
+
+![Theme Selection](images/theme-selection.png)
 
 ### Sound Settings
 
@@ -284,6 +306,8 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 
 ### Break Notifications
 
+![Break Notification](images/break-popup.png)
+
 #### Notification Types
 - **Sound Alert**: Audio notification when break is due
 - **Visual Alert**: Popup window with break information
@@ -335,15 +359,11 @@ Break Assistant automatically validates your timeline to prevent conflicts:
 
 ### Data Management
 
-#### Export Timeline
-- **Format**: JSON file export
+#### Timeline Persistence
+- **Format**: JSON file storage
 - **Content**: All break slots and settings
-- **Purpose**: Backup or transfer to another device
-
-#### Import Timeline
-- **Format**: JSON file import
-- **Validation**: System validates imported data
-- **Merge**: Option to merge with existing timeline
+- **Purpose**: Automatic backup of timeline data
+- **Location**: Stored in user configuration directory
 
 #### Reset Timeline
 - **Function**: Clear all break slots
@@ -512,6 +532,18 @@ A: You can export your timeline as a JSON file from the settings panel. This fil
 **Q: Can I share my timeline with others?**
 A: Timeline sharing functionality will be available in future versions. Currently, you can manually share the exported JSON file.
 
+### Window Behavior
+- **Always on Top**: If enabled in settings, the main window will stay above all others and this will apply immediately on app startup, no need to re-save settings.
+
+### Break Popup
+- The popup now always shows a **Break Again** button after a break ends, which is always enabled and restarts the break timer for both manual and scheduled breaks.
+
+### Next Break Display
+- The main page's next break label always shows whether the next break is 'scheduled' or 'default'.
+
+### Auto-start Next Session
+- If enabled in Preferences, the work timer will only start after you close the break popup (Skip/Close), not automatically when the break ends.
+
 ---
 
-*For additional support, visit our [GitHub repository](https://github.com/your-username/break-assistant) or contact our support team.* 
+*For additional support, visit our [GitHub repository](https://github.com/hmjahid/break-assistant) or contact our support team.* 

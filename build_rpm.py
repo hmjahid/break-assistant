@@ -82,10 +82,13 @@ cp requirements.txt $RPM_BUILD_ROOT/usr/share/break-assistant/
 cp README.md $RPM_BUILD_ROOT/usr/share/break-assistant/
 cp -r docs $RPM_BUILD_ROOT/usr/share/break-assistant/
 
+# Create resources directory and copy audio files
+mkdir -p $RPM_BUILD_ROOT/usr/share/break-assistant/src/resources/audio
+cp $RPM_BUILD_DIR/break-assistant-1.0.0/src/audio/*.wav $RPM_BUILD_ROOT/usr/share/break-assistant/src/resources/audio/ 2>/dev/null || true
+cp $RPM_BUILD_DIR/break-assistant-1.0.0/src/audio/*.mp3 $RPM_BUILD_ROOT/usr/share/break-assistant/src/resources/audio/ 2>/dev/null || true
+
 # Copy icon to RPM package icons directory
-icons_dir = os.path.join(rpm_build_dir, 'usr', 'share', 'icons', 'hicolor', '256x256', 'apps')
-os.makedirs(icons_dir, exist_ok=True)
-shutil.copy('break-assistant.png', os.path.join(icons_dir, 'break-assistant.png'))
+cp break-assistant.png $RPM_BUILD_ROOT/usr/share/icons/hicolor/256x256/apps/break-assistant.png
 
 # Create launcher script
 cat > $RPM_BUILD_ROOT/usr/bin/break-assistant << 'EOF'
@@ -139,6 +142,21 @@ EOF
                 shutil.copytree(item, source_dir / item)
             else:
                 shutil.copy(item, source_dir / item)
+    
+    # Ensure audio files are in the correct location for the RPM package
+    # The audio manager expects audio files in resources/audio relative to src
+    resources_dir = source_dir / "src" / "resources" / "audio"
+    resources_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Copy audio files to the resources directory
+    audio_src = Path("src/audio")
+    if audio_src.exists():
+        for audio_file in audio_src.glob("*"):
+            if audio_file.is_file():
+                shutil.copy(audio_file, resources_dir / audio_file.name)
+                print(f"✓ Audio file copied: {audio_file.name}")
+    else:
+        print("Warning: src/audio directory not found")
     
     # Create tarball in current directory first
     tarball_cmd = f"tar -czf break-assistant-1.0.0.tar.gz -C {build_dir} break-assistant-1.0.0"

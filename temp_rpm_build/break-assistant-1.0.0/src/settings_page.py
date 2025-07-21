@@ -38,7 +38,7 @@ class SettingsPage(ctk.CTkFrame):
         self.scrollable.bind_all("<MouseWheel>", self._on_mousewheel)
         # Info section
         try:
-            info_label = ctk.CTkLabel(self.scrollable, text="Configure your notifications and appearance settings.\nSettings are saved automatically.", font=ctk.CTkFont(size=13), justify="center", wraplength=500, text_color="gray")
+            info_label = ctk.CTkLabel(self.scrollable, text="Configure your notifications and appearance settings.", font=ctk.CTkFont(size=13), justify="center", wraplength=500, text_color="gray")
             info_label.grid(row=0, column=0, pady=(10, 5), sticky="ew")
         except Exception as e:
             print(f"Error in info_label: {e}")

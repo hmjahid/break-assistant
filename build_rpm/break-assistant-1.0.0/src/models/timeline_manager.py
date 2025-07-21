@@ -109,6 +109,46 @@ class BreakSlot:
             return None
         
         return break_datetime
+    
+    def get_next_occurrence_tomorrow(self, current_datetime: datetime) -> Optional[datetime]:
+        """Get the next occurrence of this break slot (including tomorrow if needed).
+        
+        Args:
+            current_datetime: Current date and time
+            
+        Returns:
+            Next occurrence datetime or None if no more occurrences
+        """
+        if not self.is_active_today(current_datetime):
+            # Check if it's active tomorrow
+            tomorrow = current_datetime.date() + timedelta(days=1)
+            tomorrow_datetime = datetime.combine(tomorrow, current_datetime.time())
+            if self.is_active_today(tomorrow_datetime):
+                return datetime.combine(tomorrow, self.start_time)
+            return None
+        
+        # Create datetime for today with the break start time
+        today = current_datetime.date()
+        break_datetime = datetime.combine(today, self.start_time)
+        
+        # If the break time has already passed today, check tomorrow
+        try:
+            if break_datetime <= current_datetime:
+                # Check tomorrow
+                tomorrow = today + timedelta(days=1)
+                tomorrow_datetime = datetime.combine(tomorrow, current_datetime.time())
+                if self.is_active_today(tomorrow_datetime):
+                    return datetime.combine(tomorrow, self.start_time)
+                return None
+        except (TypeError, ValueError):
+            # If there's a type error, check tomorrow
+            tomorrow = today + timedelta(days=1)
+            tomorrow_datetime = datetime.combine(tomorrow, current_datetime.time())
+            if self.is_active_today(tomorrow_datetime):
+                return datetime.combine(tomorrow, self.start_time)
+            return None
+        
+        return break_datetime
 
 
 class TimelineManager:
@@ -280,7 +320,16 @@ class TimelineManager:
         next_occurrence = None
         
         for slot in active_slots:
+            # First try to get next occurrence today
             occurrence = slot.get_next_occurrence(current_datetime)
+            if occurrence:
+                if next_occurrence is None or occurrence < next_occurrence:
+                    next_break = slot
+                    next_occurrence = occurrence
+                continue
+            
+            # If no occurrence today, try tomorrow
+            occurrence = slot.get_next_occurrence_tomorrow(current_datetime)
             try:
                 if occurrence and (next_occurrence is None or occurrence < next_occurrence):
                     next_break = slot

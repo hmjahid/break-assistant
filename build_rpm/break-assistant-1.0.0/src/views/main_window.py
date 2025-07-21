@@ -235,6 +235,8 @@ class MainWindow(ctk.CTk):
     
     def start_break_now(self) -> None:
         """Start a break immediately."""
+        # Track if timer was running before manual break
+        self._resume_work_after_manual_break = self.timer_running
         # Stop current timer if running
         if self.timer_running:
             self.stop_timer()
@@ -263,9 +265,11 @@ class MainWindow(ctk.CTk):
                 self.message = message
         
         break_slot = BreakSlot(break_duration, break_message)
+        break_slot.manual = True
         
-        # Show popup
+        # Show popup, pass resume_work_after_manual_break flag
         popup = BreakPopup(self, self.controller)
+        popup._resume_work_after_manual_break = getattr(self, '_resume_work_after_manual_break', False)
         popup.set_break_info(break_slot, None)
         # Popup is already visible from __init__
     
@@ -299,38 +303,99 @@ class MainWindow(ctk.CTk):
                         break_slot, occurrence_time = next_break
                         self.current_break_slot = break_slot
                         self.next_break_time = occurrence_time
-                        
                         # Update next break display
                         time_str = occurrence_time.strftime("%H:%M")
-                        self.next_break_label.configure(
-                            text=f"Next break: {time_str} ({break_slot.duration}min)"
-                        )
+                        # Ensure scheduled attribute is present for timeline breaks
+                        if not hasattr(break_slot, 'scheduled'):
+                            break_slot.scheduled = True
+                        label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
+                        
+                        # Check if the break is today or tomorrow
+                        now = datetime.now()
+                        if occurrence_time.date() == now.date():
+                            date_str = "Today"
+                        elif occurrence_time.date() == now.date() + timedelta(days=1):
+                            date_str = "Tomorrow"
+                        else:
+                            date_str = occurrence_time.strftime("%Y-%m-%d")
+                        
+                        display_text = f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                        self.next_break_label.configure(text=display_text)
                         
                         # Check if it's time for the break
-                        now = datetime.now()
                         if now >= occurrence_time:
                             self.controller.show_break_notification(break_slot, occurrence_time)
+                    else:
+                        # No breaks scheduled
+                        self.next_break_label.configure(text="No breaks scheduled")
                     
-                    time.sleep(30)  # Check every 30 seconds
+                    # Refresh the display every 10 seconds instead of 30
+                    time.sleep(10)
                     self.after(0, self.refresh_next_break_label)
-                    
                 except Exception as e:
                     print(f"Timeline monitor error: {e}")
                     time.sleep(60)  # Wait longer on error
-        
         monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
         monitor_thread.start()
     
+    def force_refresh_next_break(self) -> None:
+        """Force an immediate refresh of the next break label."""
+        try:
+            next_break = self.controller.get_next_break()
+            if next_break:
+                break_slot, occurrence_time = next_break
+                time_str = occurrence_time.strftime("%H:%M")
+                # Ensure scheduled attribute is present for timeline breaks
+                if not hasattr(break_slot, 'scheduled'):
+                    break_slot.scheduled = True
+                label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
+                
+                # Check if the break is today or tomorrow
+                now = datetime.now()
+                if occurrence_time.date() == now.date():
+                    date_str = "Today"
+                elif occurrence_time.date() == now.date() + timedelta(days=1):
+                    date_str = "Tomorrow"
+                else:
+                    date_str = occurrence_time.strftime("%Y-%m-%d")
+                
+                display_text = f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                self.next_break_label.configure(text=display_text)
+                print(f"DEBUG: Force refreshed next break label: {display_text}")
+            else:
+                self.next_break_label.configure(text="No breaks scheduled")
+                print("DEBUG: Force refreshed - no breaks scheduled")
+        except Exception as e:
+            print(f"DEBUG: Error in force_refresh_next_break: {e}")
+    
     def refresh_next_break_label(self):
-        next_break = self.controller.get_next_break()
-        if next_break:
-            break_slot, occurrence_time = next_break
-            time_str = occurrence_time.strftime("%H:%M")
-            self.next_break_label.configure(
-                text=f"Next break: {time_str} ({break_slot.duration}min)"
-            )
-        else:
-            self.next_break_label.configure(text="No breaks scheduled")
+        """Refresh the next break label (called by timeline monitor)."""
+        try:
+            next_break = self.controller.get_next_break()
+            if next_break:
+                break_slot, occurrence_time = next_break
+                time_str = occurrence_time.strftime("%H:%M")
+                # Ensure scheduled attribute is present for timeline breaks
+                if not hasattr(break_slot, 'scheduled'):
+                    break_slot.scheduled = True
+                label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
+                
+                # Check if the break is today or tomorrow
+                now = datetime.now()
+                if occurrence_time.date() == now.date():
+                    date_str = "Today"
+                elif occurrence_time.date() == now.date() + timedelta(days=1):
+                    date_str = "Tomorrow"
+                else:
+                    date_str = occurrence_time.strftime("%Y-%m-%d")
+                
+                self.next_break_label.configure(
+                    text=f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                )
+            else:
+                self.next_break_label.configure(text="No breaks scheduled")
+        except Exception as e:
+            print(f"DEBUG: Error in refresh_next_break_label: {e}")
     
     def open_settings(self) -> None:
         """Open settings dialog."""
