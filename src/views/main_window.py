@@ -80,7 +80,7 @@ class MainWindow(ctk.CTk):
         button_frame.grid_columnconfigure(4, weight=1)
 
         # Start/Stop button
-        self.start_button = ctk.CTkButton(button_frame, text="Start", command=self.toggle_timer, width=80)
+        self.start_button = ctk.CTkButton(button_frame, text="Start Work", command=self.toggle_timer, width=80)
         self.start_button.grid(row=0, column=0, padx=3, pady=10, sticky="ew")
 
         # Reset button
@@ -371,29 +371,38 @@ class MainWindow(ctk.CTk):
     def refresh_next_break_label(self):
         """Refresh the next break label (called by timeline monitor)."""
         try:
+            now = datetime.now()
+            # Get default work session end time if timer is running
+            work_end_time = None
+            if self.timer_running and self.timer_start_time:
+                work_end_time = self.timer_start_time + timedelta(seconds=int(self.timer_duration))
+            # Get next scheduled break
             next_break = self.controller.get_next_break()
+            scheduled_time = None
+            scheduled_label = None
             if next_break:
                 break_slot, occurrence_time = next_break
-                time_str = occurrence_time.strftime("%H:%M")
-                # Ensure scheduled attribute is present for timeline breaks
-                if not hasattr(break_slot, 'scheduled'):
-                    break_slot.scheduled = True
+                scheduled_time = occurrence_time
                 label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
-                
-                # Check if the break is today or tomorrow
-                now = datetime.now()
-                if occurrence_time.date() == now.date():
-                    date_str = "Today"
-                elif occurrence_time.date() == now.date() + timedelta(days=1):
-                    date_str = "Tomorrow"
-                else:
-                    date_str = occurrence_time.strftime("%Y-%m-%d")
-                
+                scheduled_label = f"Next break: {occurrence_time.strftime('%H:%M')} ({break_slot.duration}min {label_type})"
+            # Decide which break is sooner
+            if work_end_time and (not scheduled_time or work_end_time <= scheduled_time):
+                minutes = int((work_end_time - now).total_seconds()) // 60
+                seconds = int((work_end_time - now).total_seconds()) % 60
                 self.next_break_label.configure(
-                    text=f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                    text=f"Next break at: {work_end_time.strftime('%H:%M')} (in {minutes:02d}:{seconds:02d}) (work session)"
                 )
+            elif scheduled_time:
+                self.next_break_label.configure(text=scheduled_label)
             else:
-                self.next_break_label.configure(text="No breaks scheduled")
+                # No timer running and no scheduled break
+                # Show default: now + default work duration
+                settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                work_duration = int(settings.get('work_duration', 20))
+                default_time = now + timedelta(minutes=work_duration)
+                self.next_break_label.configure(
+                    text=f"Next break at: {default_time.strftime('%H:%M')} (default)"
+                )
         except Exception as e:
             print(f"DEBUG: Error in refresh_next_break_label: {e}")
     

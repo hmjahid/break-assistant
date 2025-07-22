@@ -42,6 +42,7 @@ class BreakPopup(ctk.CTkToplevel):
         self.break_remaining = 0
         
         self.setup_ui()
+        self.protocol("WM_DELETE_WINDOW", self.on_window_close)
     
     def setup_ui(self) -> None:
         """Setup user interface."""
@@ -320,12 +321,26 @@ class BreakPopup(ctk.CTkToplevel):
             print(f"DEBUG: Could not play break end sound: {e}")
         # Always enable Break Again button
 
+    def on_window_close(self):
+        # Only trigger start work for default breaks (not manual)
+        if self.break_slot and not getattr(self.break_slot, 'manual', False):
+            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
+                try:
+                    self.controller.main_window.start_timer()
+                except Exception as e:
+                    print(f"DEBUG: Could not start work timer on window close: {e}")
+        self.destroy()
+
     def skip_break(self):
-        """Skip the break and start work timer if auto start is enabled and not manual break. For manual break, resume work timer only if it was running before."""
         self.break_timer_running = False
         self.destroy()
-        if getattr(self.break_slot, 'manual', False):
-            # Resume work timer only if it was running before
+        if self.break_slot and not getattr(self.break_slot, 'manual', False):
+            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
+                try:
+                    self.controller.main_window.reset_timer()
+                except Exception as e:
+                    print(f"DEBUG: Could not reset timer after skip: {e}")
+        elif getattr(self.break_slot, 'manual', False):
             if getattr(self, '_resume_work_after_manual_break', False):
                 if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
                     try:
@@ -336,11 +351,15 @@ class BreakPopup(ctk.CTkToplevel):
             self.start_work_timer()
 
     def close_break(self):
-        """Close the popup and start work timer if auto start is enabled and not manual break. For manual break, resume work timer only if it was running before."""
         self.break_timer_running = False
         self.destroy()
-        if getattr(self.break_slot, 'manual', False):
-            # Resume work timer only if it was running before
+        if self.break_slot and not getattr(self.break_slot, 'manual', False):
+            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
+                try:
+                    self.controller.main_window.reset_timer()
+                except Exception as e:
+                    print(f"DEBUG: Could not reset timer after close: {e}")
+        elif getattr(self.break_slot, 'manual', False):
             if getattr(self, '_resume_work_after_manual_break', False):
                 if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
                     try:
