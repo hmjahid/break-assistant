@@ -295,7 +295,7 @@ class MainWindow(ctk.CTk):
     def start_timeline_monitor(self) -> None:
         """Start monitoring timeline for upcoming breaks (scheduled breaks)."""
         def monitor_loop():
-            last_popup_time = None
+            last_popup_timestamp = None
             while True:
                 try:
                     next_break = self.controller.get_next_break()
@@ -306,11 +306,18 @@ class MainWindow(ctk.CTk):
                         now = datetime.now()
                         # Only show popup once per scheduled break occurrence
                         if now >= occurrence_time:
-                            if last_popup_time != occurrence_time:
+                            # Use timestamp for comparison to avoid duplicate popups
+                            occ_ts = occurrence_time.timestamp()
+                            if last_popup_timestamp != occ_ts:
+                                # Ensure break_slot has a valid duration
+                                if not hasattr(break_slot, 'duration') or not break_slot.duration:
+                                    settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                                    break_duration = int(settings.get('break_duration', 1))
+                                    break_slot.duration = break_duration
                                 from src.views.break_popup import BreakPopup
                                 popup = BreakPopup(self, self.controller)
                                 popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
-                                last_popup_time = occurrence_time
+                                last_popup_timestamp = occ_ts
                     # Refresh the display every 10 seconds
                     time.sleep(10)
                     self.after(0, self.refresh_next_break_label)
