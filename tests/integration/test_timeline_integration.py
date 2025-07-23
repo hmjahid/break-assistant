@@ -10,9 +10,7 @@ class TestTimelineIntegration:
     def test_controller_timeline_integration(self, temp_dir):
         """Test timeline integration with app controller."""
         # Create controller with temporary files
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Test adding break slot through controller
         timeline_manager = controller.get_timeline_manager()
@@ -31,9 +29,7 @@ class TestTimelineIntegration:
     def test_timeline_persistence_integration(self, temp_dir):
         """Test timeline persistence through controller."""
         # Create controller
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Add break slots
         timeline_manager = controller.get_timeline_manager()
@@ -44,9 +40,7 @@ class TestTimelineIntegration:
         timeline_manager.save_timeline()
         
         # Create new controller and load timeline
-        new_controller = AppController()
-        new_controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        new_controller.settings_manager.settings_file = temp_dir / "settings.json"
+        new_controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Load timeline
         new_timeline_manager = new_controller.get_timeline_manager()
@@ -59,9 +53,7 @@ class TestTimelineIntegration:
 
     def test_timeline_validation_integration(self, temp_dir):
         """Test timeline validation through controller."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         timeline_manager = controller.get_timeline_manager()
         
@@ -80,9 +72,7 @@ class TestTimelineIntegration:
 
     def test_timeline_break_notification_integration(self, temp_dir):
         """Test break notification integration with timeline."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Add a future break
         future_time = datetime.now() + timedelta(minutes=5)
@@ -101,9 +91,7 @@ class TestTimelineIntegration:
 
     def test_timeline_settings_integration(self, temp_dir):
         """Test timeline integration with settings."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Test saving settings
         settings = {
@@ -121,9 +109,7 @@ class TestTimelineIntegration:
 
     def test_timeline_platform_integration(self, temp_dir):
         """Test timeline integration with platform utilities."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Test platform detection
         platform = controller.get_platform()
@@ -136,9 +122,7 @@ class TestTimelineIntegration:
 
     def test_timeline_theme_integration(self, temp_dir):
         """Test timeline integration with theme management."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Test theme application
         controller.apply_theme("dark")
@@ -153,9 +137,7 @@ class TestTimelineIntegration:
 
     def test_timeline_audio_integration(self, temp_dir):
         """Test timeline integration with audio management."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Test audio manager
         audio_manager = controller.get_audio_manager()
@@ -167,9 +149,7 @@ class TestTimelineIntegration:
 
     def test_timeline_complex_scenario(self, temp_dir):
         """Test complex timeline scenario with multiple components."""
-        controller = AppController()
-        controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        controller.settings_manager.settings_file = temp_dir / "settings.json"
+        controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         # Setup complex timeline
         timeline_manager = controller.get_timeline_manager()
@@ -213,9 +193,7 @@ class TestTimelineIntegration:
         timeline_manager.save_timeline()
         
         # Create new controller and verify persistence
-        new_controller = AppController()
-        new_controller.timeline_manager.timeline_file = temp_dir / "timeline.json"
-        new_controller.settings_manager.settings_file = temp_dir / "settings.json"
+        new_controller = AppController(timeline_file=temp_dir / "timeline.json", settings_file=temp_dir / "settings.json")
         
         new_timeline_manager = new_controller.get_timeline_manager()
         new_timeline_manager.load_timeline()
@@ -225,4 +203,4 @@ class TestTimelineIntegration:
         # Verify settings were persisted
         settings = new_controller.load_settings()
         assert settings["sound_enabled"] is True
-        assert settings["theme"] == "light" 
+        assert settings["theme"] == "light"

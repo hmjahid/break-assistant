@@ -20,6 +20,7 @@ def timeline_manager(temp_dir):
     """Create a TimelineManager with temporary file."""
     manager = TimelineManager()
     manager.timeline_file = temp_dir / "timeline.json"
+    manager.break_slots = [] # Clear break slots for each test
     return manager
 
 
@@ -55,12 +56,15 @@ def sample_break_slots():
 
 
 @pytest.fixture
-def mock_controller():
+def mock_controller(temp_dir):
     """Create a mock controller for testing."""
     class MockController:
         def __init__(self):
             self.timeline_manager = TimelineManager()
+            self.timeline_manager.timeline_file = temp_dir / "timeline.json"
+            self.timeline_manager.break_slots = []
             self.settings_manager = SettingsManager()
+            self.settings_manager.settings_file = temp_dir / "settings.json"
         
         def get_timeline_manager(self):
             return self.timeline_manager

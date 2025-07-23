@@ -259,14 +259,16 @@ ID: {slot.id}"""
         result = self.show_confirm("Confirm Delete", f"Are you sure you want to delete the break at {self.selected_slot.start_time.strftime('%H:%M')}?")
         if result:
             print(f"DEBUG: Deleting break slot: {self.selected_slot.id}")
-            self.timeline_manager.delete_break_slot(self.selected_slot.id)
-            self.selected_slot = None
-            self.edit_button.configure(state="disabled")
-            self.delete_button.configure(state="disabled")
-            self.refresh_timeline()
-            if hasattr(self.controller, 'main_window_ref'):
-                print("DEBUG: Calling main_window_ref.force_refresh_next_break() after delete_selected_slot")
-                self.controller.main_window_ref.force_refresh_next_break()
+            deleted = self.timeline_manager.delete_break_slot(self.selected_slot.id)
+            if deleted:
+                self.selected_slot = None
+                self.edit_button.configure(state="disabled")
+                self.delete_button.configure(state="disabled")
+                self.refresh_timeline()
+                if hasattr(self.controller, 'main_window_ref'):
+                    print("DEBUG: Calling main_window_ref.force_refresh_next_break() after delete_selected_slot")
+                    self.controller.main_window_ref.force_refresh_next_break()
+                return True
     
     def validate_timeline(self) -> None:
         """Validate the timeline and display results."""

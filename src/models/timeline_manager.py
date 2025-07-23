@@ -154,16 +154,19 @@ class BreakSlot:
 class TimelineManager:
     """Manages custom break timeline and scheduling."""
     
-    def __init__(self) -> None:
+    def __init__(self, timeline_file=None) -> None:
         """Initialize timeline manager.
         
         Args:
             timeline_file: Path to timeline file
         """
         self.break_slots: List[BreakSlot] = []
-        CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config", "break-assistant")
-        os.makedirs(CONFIG_DIR, exist_ok=True)
-        self.timeline_file = os.path.join(CONFIG_DIR, "timeline.json")
+        if timeline_file:
+            self.timeline_file = timeline_file
+        else:
+            CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config", "break-assistant")
+            os.makedirs(CONFIG_DIR, exist_ok=True)
+            self.timeline_file = os.path.join(CONFIG_DIR, "timeline.json")
         self.load_timeline()
     
     def add_break_slot(self, start_time: time, duration: int, message: str = "",
@@ -403,6 +406,7 @@ class TimelineManager:
     
     def load_timeline(self) -> None:
         """Load timeline from file."""
+        self.break_slots = [] # Clear existing slots
         try:
             with open(self.timeline_file, 'r') as f:
                 data = json.load(f)
