@@ -301,18 +301,14 @@ class MainWindow(ctk.CTk):
                         self.current_break_slot = orig_break_slot
                         self.next_break_time = occurrence_time
                         now = datetime.now()
-                        # Use a unique break id if available (e.g., from timeline), else fallback to occurrence_time
                         break_id = getattr(orig_break_slot, 'id', None) or occurrence_time.timestamp()
-                        # Reset last_popup_timestamp if the next break changes (prevents missing popups if app is left running)
                         if last_occurrence_time is None or occurrence_time != last_occurrence_time or last_break_id != break_id:
                             last_popup_timestamp = None
                             last_occurrence_time = occurrence_time
                             last_break_id = break_id
-                        # Only show popup once per scheduled break occurrence
                         if now >= occurrence_time:
                             occ_ts = occurrence_time.timestamp()
                             if last_popup_timestamp != occ_ts:
-                                # Always use a new break slot object for scheduled breaks to avoid mutation issues
                                 duration = getattr(orig_break_slot, 'duration', None)
                                 if duration is None or duration <= 0:
                                     settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
@@ -324,14 +320,15 @@ class MainWindow(ctk.CTk):
                                     if not attr.startswith('__') and not callable(getattr(orig_break_slot, attr)):
                                         setattr(break_slot, attr, getattr(orig_break_slot, attr))
                                 break_slot.duration = duration
-                                # Always use break_message from preferences for custom break popup
+                                # Use the exact break_message_var value from preferences for the popup message
                                 settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
                                 custom_message = settings.get('break_message', None)
+                                if custom_message:
+                                    break_slot.message = custom_message
                                 from src.views.break_popup import BreakPopup
                                 popup = BreakPopup(self, self.controller)
-                                popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running, custom_message=custom_message)
+                                popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
                                 last_popup_timestamp = occ_ts
-                    # Refresh the display every 10 seconds
                     time.sleep(10)
                     self.after(0, self.refresh_next_break_label)
                 except Exception as e:
