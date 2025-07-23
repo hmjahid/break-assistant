@@ -7,18 +7,15 @@ import time
 
 class MainWindow(ctk.CTk):
     def show_break_notification(self):
-        """Show break popup when timer finishes (default break)."""
+        """Show break popup when timer finishes (default break), always using duration from preferences/settings."""
         try:
             from src.views.break_popup import BreakPopup
-            break_slot = getattr(self, 'current_break_slot', None)
-            if break_slot is None:
-                # Use break duration from settings if available
-                settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
-                break_duration = int(settings.get('break_duration', 1))
-                class SimpleBreakSlot:
-                    duration = break_duration
-                    scheduled = False
-                break_slot = SimpleBreakSlot()
+            settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+            break_duration = int(settings.get('break_duration', 1))
+            class DefaultBreakSlot:
+                duration = break_duration
+                scheduled = False
+            break_slot = DefaultBreakSlot()
             occurrence_time = datetime.now()
             popup = BreakPopup(self, self.controller)
             popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
@@ -295,6 +292,7 @@ class MainWindow(ctk.CTk):
         def monitor_loop():
             last_popup_timestamp = None
             last_occurrence_time = None
+            last_break_id = None
             while True:
                 try:
                     next_break = self.controller.get_next_break()
@@ -303,30 +301,35 @@ class MainWindow(ctk.CTk):
                         self.current_break_slot = orig_break_slot
                         self.next_break_time = occurrence_time
                         now = datetime.now()
+                        # Use a unique break id if available (e.g., from timeline), else fallback to occurrence_time
+                        break_id = getattr(orig_break_slot, 'id', None) or occurrence_time.timestamp()
                         # Reset last_popup_timestamp if the next break changes (prevents missing popups if app is left running)
-                        if last_occurrence_time is None or occurrence_time != last_occurrence_time:
+                        if last_occurrence_time is None or occurrence_time != last_occurrence_time or last_break_id != break_id:
                             last_popup_timestamp = None
                             last_occurrence_time = occurrence_time
+                            last_break_id = break_id
                         # Only show popup once per scheduled break occurrence
                         if now >= occurrence_time:
                             occ_ts = occurrence_time.timestamp()
                             if last_popup_timestamp != occ_ts:
-                                break_slot = orig_break_slot
-                                duration = getattr(break_slot, 'duration', None)
+                                # Always use a new break slot object for scheduled breaks to avoid mutation issues
+                                duration = getattr(orig_break_slot, 'duration', None)
                                 if duration is None or duration <= 0:
                                     settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
                                     duration = int(settings.get('break_duration', 1))
-                                    class ScheduledBreakSlot:
-                                        pass
-                                    break_slot_new = ScheduledBreakSlot()
-                                    for attr in dir(orig_break_slot):
-                                        if not attr.startswith('__') and not callable(getattr(orig_break_slot, attr)):
-                                            setattr(break_slot_new, attr, getattr(orig_break_slot, attr))
-                                    break_slot_new.duration = duration
-                                    break_slot = break_slot_new
+                                class ScheduledBreakSlot:
+                                    pass
+                                break_slot = ScheduledBreakSlot()
+                                for attr in dir(orig_break_slot):
+                                    if not attr.startswith('__') and not callable(getattr(orig_break_slot, attr)):
+                                        setattr(break_slot, attr, getattr(orig_break_slot, attr))
+                                break_slot.duration = duration
+                                # Always use break_message from preferences for custom break popup
+                                settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                                custom_message = settings.get('break_message', None)
                                 from src.views.break_popup import BreakPopup
                                 popup = BreakPopup(self, self.controller)
-                                popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
+                                popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running, custom_message=custom_message)
                                 last_popup_timestamp = occ_ts
                     # Refresh the display every 10 seconds
                     time.sleep(10)
