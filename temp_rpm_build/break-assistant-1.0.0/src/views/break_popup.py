@@ -8,6 +8,7 @@ class BreakPopup(ctk.CTkToplevel):
     """Break notification popup."""
     
     def __init__(self, master, controller) -> None:
+        print("DEBUG: BreakPopup __init__ called")
         super().__init__(master)
         self.controller = controller
         self.title("Break Time!")
@@ -23,12 +24,12 @@ class BreakPopup(ctk.CTkToplevel):
         # Make visible first, then grab
         self.deiconify()
         self.lift()
-        self.focus_force()
+        # self.focus_force()
         # Now try to grab after window is visible
-        try:
-            self.grab_set()
-        except Exception as e:
-            print(f"Warning: Could not grab popup: {e}")
+        # try:
+        #     self.grab_set()
+        # except Exception as e:
+        #     print(f"Warning: Could not grab popup: {e}")
         self.break_slot = None
         self.occurrence_time = None
         self.break_timer_running = False
@@ -58,69 +59,65 @@ class BreakPopup(ctk.CTkToplevel):
         # Break info
         self.break_info_label = ctk.CTkLabel(main_frame, text="Time for your break!", 
                                             font=ctk.CTkFont(size=16))
-        self.break_info_label.pack(pady=20)
+        # Use only grid everywhere (no pack)
+        # Break info label
+        self.break_info_label = ctk.CTkLabel(main_frame, text="Time for your break!", font=ctk.CTkFont(size=16))
+        self.break_info_label.grid(row=0, column=0, columnspan=2, pady=20, sticky="ew")
         
-        # Timer display
+        # Timer display frame
         timer_frame = ctk.CTkFrame(main_frame)
-        timer_frame.pack(pady=10, fill="x", padx=20)
+        timer_frame.grid(row=1, column=0, columnspan=2, padx=20, pady=10, sticky="ew")
+        timer_frame.grid_columnconfigure(0, weight=1)
         
-        self.timer_label = ctk.CTkLabel(timer_frame, text="--:--", 
-                                       font=ctk.CTkFont(size=32, weight="bold"))
-        self.timer_label.pack(pady=10)
-        
-        # Progress bar
+        self.timer_label = ctk.CTkLabel(timer_frame, text="--:--", font=ctk.CTkFont(size=32, weight="bold"))
+        self.timer_label.grid(row=0, column=0, pady=10, sticky="ew")
         self.progress_bar = ctk.CTkProgressBar(timer_frame)
-        self.progress_bar.pack(pady=(0, 10), padx=20, fill="x")
+        self.progress_bar.grid(row=1, column=0, pady=(0, 10), padx=20, sticky="ew")
         self.progress_bar.set(0)
         
-        # Time details
+        # Time details frame
         time_frame = ctk.CTkFrame(main_frame)
-        time_frame.pack(pady=10, fill="x", padx=20)
-        
-        self.start_time_label = ctk.CTkLabel(time_frame, text="Start: --:--", 
-                                           font=ctk.CTkFont(size=12))
-        self.start_time_label.pack(pady=5)
-        
-        self.end_time_label = ctk.CTkLabel(time_frame, text="End: --:--", 
-                                         font=ctk.CTkFont(size=12))
-        self.end_time_label.pack(pady=5)
-        
-        # (Removed next break label)
+        time_frame.grid(row=2, column=0, columnspan=2, padx=20, pady=10, sticky="ew")
+        time_frame.grid_columnconfigure(0, weight=1)
+        self.start_time_label = ctk.CTkLabel(time_frame, text="Start: --:--", font=ctk.CTkFont(size=12))
+        self.start_time_label.grid(row=0, column=0, pady=5, sticky="ew")
+        self.end_time_label = ctk.CTkLabel(time_frame, text="End: --:--", font=ctk.CTkFont(size=12))
+        self.end_time_label.grid(row=1, column=0, pady=5, sticky="ew")
         
         # Buttons frame
         button_frame = ctk.CTkFrame(main_frame)
-        button_frame.pack(pady=15, fill="x", padx=20)  # Reduced pady from 20 to 15
+        button_frame.grid(row=3, column=0, columnspan=2, padx=20, pady=10, sticky="ew")
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
+        self.start_button = ctk.CTkButton(button_frame, text="Start Break", command=self.start_break)
+        self.start_button.grid(row=0, column=0, padx=5, pady=8, sticky="ew")
+        self.stop_button = ctk.CTkButton(button_frame, text="Stop", command=self.stop_break, state="disabled")
+        self.stop_button.grid(row=0, column=1, padx=5, pady=8, sticky="ew")
+        self.snooze_button = ctk.CTkButton(button_frame, text="Snooze", command=self.snooze_break)
+        self.snooze_button.grid(row=0, column=2, padx=5, pady=8, sticky="ew")
         
-        # Start break button
-        self.start_button = ctk.CTkButton(button_frame, text="Start Break", 
-                                         command=self.start_break)
-        self.start_button.grid(row=0, column=0, padx=5, pady=8, sticky="ew")  # Reduced pady from 10 to 8
-        
-        # Stop button
-        self.stop_button = ctk.CTkButton(button_frame, text="Stop", 
-                                        command=self.stop_break, state="disabled")
-        self.stop_button.grid(row=0, column=1, padx=5, pady=8, sticky="ew")  # Reduced pady from 10 to 8
-        
-        # Snooze button
-        self.snooze_button = ctk.CTkButton(button_frame, text="Snooze", 
-                                          command=self.snooze_break)
-        self.snooze_button.grid(row=0, column=2, padx=5, pady=8, sticky="ew")  # Reduced pady from 10 to 8
-        
-        # Remove OK button, add Skip and Close buttons
+        # Skip/OK and Close buttons (row 4, columns 0 and 1)
         self.skip_button = ctk.CTkButton(main_frame, text="Skip", command=self.skip_break)
-        self.skip_button.pack(side="left", pady=8, padx=(20, 5), fill="x", expand=True)
+        self.skip_button.grid(row=4, column=0, padx=(20, 5), pady=8, sticky="ew")
         self.close_button = ctk.CTkButton(main_frame, text="Close", command=self.close_break)
-        self.close_button.pack(side="right", pady=8, padx=(5, 20), fill="x", expand=True)
+        self.close_button.grid(row=4, column=1, padx=(5, 20), pady=8, sticky="ew")
+        main_frame.grid_rowconfigure(0, weight=0)
+        main_frame.grid_rowconfigure(1, weight=0)
+        main_frame.grid_rowconfigure(2, weight=0)
+        main_frame.grid_rowconfigure(3, weight=0)
+        main_frame.grid_rowconfigure(4, weight=0)
+        main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_columnconfigure(1, weight=1)
 
     def set_skip_button_to_ok(self):
         # Change skip button to OK and update its command
         if hasattr(self, 'skip_button') and self.skip_button.winfo_exists():
+            self.skip_button.grid()  # Ensure visible
             self.skip_button.configure(text="OK", command=self.close_break)
     
     def set_break_info(self, break_slot, occurrence_time, manual_break=False, was_timer_running=False) -> None:
+        print(f"DEBUG: set_break_info called - manual_break={manual_break}, slot={break_slot}, occurrence_time={occurrence_time}")
         self.break_slot = break_slot
         self.occurrence_time = occurrence_time
         self.manual_break = manual_break
@@ -142,10 +139,14 @@ class BreakPopup(ctk.CTkToplevel):
             # If manual break (Break Now), start immediately
             if self.manual_break:
                 self.after(100, self.auto_start_break)
+                self.start_button.configure(text="Pause", command=self.pause_break, state="normal")
+                self.stop_button.configure(state="normal")
             else:
                 # For default/scheduled, do not auto start
                 self.start_button.configure(text="Start Break", command=self.start_break, state="normal")
                 self.stop_button.configure(state="disabled")
+            self.skip_button.grid()
+            self.close_button.grid()
         else:
             self.break_info_label.configure(text="Time for your break!")
     
@@ -168,6 +169,8 @@ class BreakPopup(ctk.CTkToplevel):
             self.break_start_time = datetime.now()
             self.start_button.configure(text="Pause", command=self.pause_break, state="normal")
             self.stop_button.configure(state="normal")
+            self.skip_button.grid()
+            self.close_button.grid()
             # Update time labels
             start_time = self.break_start_time.strftime("%H:%M")
             end_time = (self.break_start_time + timedelta(minutes=self.break_slot.duration)).strftime("%H:%M")
@@ -272,8 +275,10 @@ class BreakPopup(ctk.CTkToplevel):
             self.timer_label.configure(text="00:00")
         if hasattr(self, 'progress_bar') and self.progress_bar.winfo_exists():
             self.progress_bar.set(1.0)
-        # Change skip button to OK
+        # Change skip button to OK and ensure both buttons visible
         self.set_skip_button_to_ok()
+        if hasattr(self, 'close_button') and self.close_button.winfo_exists():
+            self.close_button.grid()
         # Play alert sound
         try:
             if hasattr(self.controller, 'play_notification_sound'):
