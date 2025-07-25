@@ -10,14 +10,98 @@ import shutil
 from pathlib import Path
 
 def run_command(cmd, cwd=None):
-    """Run a command and return the result."""
+    """Run a command and return the result, printing full stdout and stderr on failure."""
     print(f"Running: {cmd}")
     result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
     if result.returncode != 0:
-        print(f"Error: {result.stderr}")
+        print("\n===== COMMAND FAILED =====")
+        print(f"Command: {cmd}")
+        print(f"Exit code: {result.returncode}")
+        print(f"STDOUT:\n{result.stdout}")
+        print(f"STDERR:\n{result.stderr}")
+        print("==========================\n")
         return False
     print(f"Success: {result.stdout}")
     return True
+
+def create_pyinstaller_spec(build_dir):
+    """Create PyInstaller spec file dynamically."""
+    spec_content = '''# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+a = Analysis(
+    ['../src/main.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ('../src/audio', 'audio'),
+    ],
+    hiddenimports=[
+        'customtkinter',
+        'pygame',
+        'PIL',
+        'PIL._tkinter_finder',
+        'tkinter',
+        'tkinter.ttk',
+        'threading',
+        'json',
+        'configparser',
+        'pathlib',
+        'datetime',
+        'time',
+        'os',
+        'sys',
+        'platform',
+    ],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name='break-assistant',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='break-assistant',
+)
+'''
+    
+    spec_file = build_dir / "break-assistant.spec"
+    with open(spec_file, "w") as f:
+        f.write(spec_content)
+    
+    print(f"✓ PyInstaller spec file created: {spec_file}")
+    return spec_file
 
 def create_appimage():
     """Create an AppImage for Break Assistant."""
@@ -25,6 +109,9 @@ def create_appimage():
     # Create build directory
     build_dir = Path("build_appimage")
     build_dir.mkdir(exist_ok=True)
+    
+    # Create PyInstaller spec file
+    spec_file = create_pyinstaller_spec(build_dir)
     
     # Create AppDir structure
     appdir = build_dir / "Break-Assistant.AppDir"
@@ -50,18 +137,19 @@ Categories=Utility;Office;
         "pyinstaller",
         "--distpath", str(appdir),
         "--workpath", str(build_dir / "build"),
-        str(build_dir / "break-assistant.spec")
+        str(spec_file)
     ]
     
     if not run_command(" ".join(pyinstaller_cmd)):
         print("PyInstaller build failed")
         return False
     
-    # Copy executable to AppDir
-    executable = appdir / "break-assistant"
-    if not executable.exists():
-        print("Executable not found")
+    # Copy executable to AppDir root
+    pyinstaller_exe = appdir / "break-assistant" / "break-assistant"
+    if not pyinstaller_exe.exists():
+        print(f"Executable not found: {pyinstaller_exe}")
         return False
+    print("✓ PyInstaller executable found in AppDir/break-assistant/break-assistant")
     
     # Create icon (placeholder)
     icon_dir = appdir / "usr" / "share" / "icons" / "hicolor" / "256x256" / "apps"
@@ -95,7 +183,7 @@ Categories=Utility;Office;
     # Create AppRun script
     apprun_content = """#!/bin/bash
 cd "$(dirname "$0")"
-exec ./break-assistant "$@"
+exec ./break-assistant/break-assistant "$@"
 """
     
     with open(appdir / "AppRun", "w") as f:

@@ -110,24 +110,26 @@ Categories=Utility;Office;
 EOF
 
 %files
-%license LICENSE
-%doc README.md docs/
+%defattr(-,root,root,-)
 /usr/bin/break-assistant
 /usr/share/break-assistant/
 /usr/share/applications/break-assistant.desktop
 /usr/share/icons/hicolor/256x256/apps/break-assistant.png
 
 %changelog
-* Mon Jan 01 2024 Break Assistant Team <support@breakassistant.app> - 1.0.0-1
-- Initial RPM package release
-- Smart break scheduling with timeline management
-- Customizable work and break durations
-- Sound alerts and theme support
+* Thu Jul 25 2025 Jahid Hasan <mdjahidhasan@gmail.com> - 1.0.0-1
+- Initial RPM release
 """
-    
+
     spec_file = rpm_specs_dir / "break-assistant.spec"
     with open(spec_file, "w") as f:
         f.write(spec_content)
+    
+    # Write spec file to project root so rpmbuild can find it
+    spec_file_path = Path("break-assistant.spec")
+    with open(spec_file_path, "w") as f:
+        f.write(spec_content)
+    print(f"✓ RPM spec file written to {spec_file_path}")
     
     # Create source tarball
     source_dir = build_dir / "break-assistant-1.0.0"

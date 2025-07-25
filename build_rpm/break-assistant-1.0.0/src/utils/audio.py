@@ -34,8 +34,23 @@ class AudioManager:
             return resolved
         else:
             base_path = os.path.dirname(__file__)
-            resolved = os.path.abspath(os.path.join(base_path, '../../resources/audio', relative_path))
-            print(f"[AUDIO DEBUG] (DEV) Resolved path: {resolved}")
+            # Try multiple possible locations for audio files in non-bundled environment
+            possible_paths = [
+                os.path.join(base_path, '../../src/resources/audio'),
+                os.path.join(base_path, '../../resources/audio'),
+                os.path.join(base_path, '../audio')
+            ]
+            
+            for base_path_option in possible_paths:
+                resolved = os.path.abspath(os.path.join(base_path_option, relative_path))
+                print(f"[AUDIO DEBUG] Trying path: {resolved}")
+                if os.path.exists(resolved):
+                    print(f"[AUDIO DEBUG] Found file at: {resolved}")
+                    return resolved
+            
+            # If not found in any location, return the first one for debugging
+            resolved = os.path.abspath(os.path.join(possible_paths[0], relative_path))
+            print(f"[AUDIO DEBUG] (DEV) Final path: {resolved}")
             return resolved
 
     def play_sound(self, file_path: str) -> None:

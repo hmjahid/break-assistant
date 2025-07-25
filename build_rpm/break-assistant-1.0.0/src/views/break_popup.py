@@ -13,35 +13,31 @@ class BreakPopup(ctk.CTkToplevel):
         self.title("Break Time!")
         self.geometry("500x510")  # Increased height by 10px from 500 to 510
         self.resizable(False, False)
-        
         # Make modal but don't grab immediately
         self.transient(master)
-        
         # Center the window
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (500 // 2)
         y = (self.winfo_screenheight() // 2) - (510 // 2)  # Updated for new height
         self.geometry(f"500x510+{x}+{y}")  # Updated height
-        
         # Make visible first, then grab
         self.deiconify()
         self.lift()
         self.focus_force()
-        
         # Now try to grab after window is visible
         try:
             self.grab_set()
         except Exception as e:
             print(f"Warning: Could not grab popup: {e}")
-        
         self.break_slot = None
         self.occurrence_time = None
         self.break_timer_running = False
         self.break_timer_thread = None
         self.break_start_time = None
         self.break_remaining = 0
-        
+        self.break_completed = False  # Track if break finished
         self.setup_ui()
+        self.protocol("WM_DELETE_WINDOW", self.on_window_close)
     
     def setup_ui(self) -> None:
         """Setup user interface."""
@@ -89,10 +85,7 @@ class BreakPopup(ctk.CTkToplevel):
                                          font=ctk.CTkFont(size=12))
         self.end_time_label.pack(pady=5)
         
-        # Next break time calculation
-        self.next_break_label = ctk.CTkLabel(time_frame, text="Next break: --:--", 
-                                           font=ctk.CTkFont(size=12))
-        self.next_break_label.pack(pady=5)
+        # (Removed next break label)
         
         # Buttons frame
         button_frame = ctk.CTkFrame(main_frame)
@@ -121,79 +114,39 @@ class BreakPopup(ctk.CTkToplevel):
         self.skip_button.pack(side="left", pady=8, padx=(20, 5), fill="x", expand=True)
         self.close_button = ctk.CTkButton(main_frame, text="Close", command=self.close_break)
         self.close_button.pack(side="right", pady=8, padx=(5, 20), fill="x", expand=True)
+
+    def set_skip_button_to_ok(self):
+        # Change skip button to OK and update its command
+        if hasattr(self, 'skip_button') and self.skip_button.winfo_exists():
+            self.skip_button.configure(text="OK", command=self.close_break)
     
-    def set_break_info(self, break_slot, occurrence_time) -> None:
+    def set_break_info(self, break_slot, occurrence_time, manual_break=False, was_timer_running=False) -> None:
         self.break_slot = break_slot
         self.occurrence_time = occurrence_time
+        self.manual_break = manual_break
+        self.was_timer_running = was_timer_running
         if break_slot:
             message = getattr(break_slot, 'message', None)
             if message:
-                self.break_info_label.configure(
-                    text=message
-                )
+                self.break_info_label.configure(text=message)
             else:
-                self.break_info_label.configure(
-                    text=f"Time for your {break_slot.duration}-minute break!"
-                )
+                self.break_info_label.configure(text=f"Time for your {break_slot.duration}-minute break!")
             self.break_remaining = break_slot.duration * 60
             self.update_timer_display()
-            
-            # Calculate and display next break time
-            self.calculate_next_break_time()
-            
-            self.after(500, self.auto_start_break)
+            # If manual break (Break Now), start immediately
+            if self.manual_break:
+                self.after(100, self.auto_start_break)
+            else:
+                # For default/scheduled, do not auto start
+                self.start_button.configure(text="Start Break", command=self.start_break, state="normal")
+                self.stop_button.configure(state="disabled")
         else:
             self.break_info_label.configure(text="Time for your break!")
     
-    def calculate_next_break_time(self) -> None:
-        """Calculate and display the next break time."""
-        try:
-            from datetime import datetime, timedelta
-            
-            # Get current time
-            now = datetime.now()
-            
-            # Get settings for default durations
-            settings = self.controller.get_settings()
-            work_duration = settings.get('work_duration', 20)
-            break_duration = settings.get('break_duration', 1)
-            
-            # Calculate default next break time (current time + work duration)
-            default_next_break = now + timedelta(minutes=work_duration)
-            
-            # Check if there's a scheduled break that's closer
-            next_scheduled_break = None
-            try:
-                next_scheduled_break = self.controller.get_next_break()
-            except Exception as e:
-                print(f"DEBUG: Error getting next scheduled break: {e}")
-            
-            # Determine which break time to use
-            if next_scheduled_break:
-                scheduled_slot, scheduled_time = next_scheduled_break
-                # Use scheduled break if it's closer than default
-                if scheduled_time < default_next_break:
-                    next_break_time = scheduled_time
-                    next_break_text = f"Next break: {scheduled_time.strftime('%H:%M')} ({scheduled_slot.duration}min scheduled)"
-                else:
-                    next_break_time = default_next_break
-                    next_break_text = f"Next break: {default_next_break.strftime('%H:%M')} ({break_duration}min default)"
-            else:
-                next_break_time = default_next_break
-                next_break_text = f"Next break: {default_next_break.strftime('%H:%M')} ({break_duration}min default)"
-            
-            # Update the label
-            if hasattr(self, 'next_break_label') and self.next_break_label.winfo_exists():
-                self.next_break_label.configure(text=next_break_text)
-                print(f"DEBUG: Next break time calculated: {next_break_text}")
-            
-        except Exception as e:
-            print(f"DEBUG: Error calculating next break time: {e}")
-            if hasattr(self, 'next_break_label') and self.next_break_label.winfo_exists():
-                self.next_break_label.configure(text="Next break: --:--")
+    # Removed calculate_next_break_time (no next break in popup)
     
     def auto_start_break(self) -> None:
-        """Automatically start the break timer when popup opens."""
+        """Automatically start the break timer when popup opens (for manual break only)."""
         if self.break_slot and not self.break_timer_running:
             print("DEBUG: Auto-starting break timer")
             self.start_break()
@@ -301,6 +254,7 @@ class BreakPopup(ctk.CTkToplevel):
         """Handle break completion."""
         print("DEBUG: Break timer finished")
         self.break_timer_running = False
+        self.break_completed = True
         # Only update widgets if they still exist
         if hasattr(self, 'start_button') and self.start_button.winfo_exists():
             self.start_button.configure(text="Break Again", command=self.start_break, state="normal")
@@ -312,21 +266,31 @@ class BreakPopup(ctk.CTkToplevel):
             self.timer_label.configure(text="00:00")
         if hasattr(self, 'progress_bar') and self.progress_bar.winfo_exists():
             self.progress_bar.set(1.0)
+        # Change skip button to OK
+        self.set_skip_button_to_ok()
         # Play alert sound
         try:
             if hasattr(self.controller, 'play_notification_sound'):
                 self.controller.play_notification_sound()
         except Exception as e:
             print(f"DEBUG: Could not play break end sound: {e}")
-        # Always enable Break Again button
 
-    def skip_break(self):
-        """Skip the break and start work timer if auto start is enabled and not manual break. For manual break, resume work timer only if it was running before."""
+    def on_window_close(self):
+        """Safely close popup, never restart break or timer after break ends or on close."""
         self.break_timer_running = False
         self.destroy()
-        if getattr(self.break_slot, 'manual', False):
-            # Resume work timer only if it was running before
-            if getattr(self, '_resume_work_after_manual_break', False):
+
+    def skip_break(self):
+        self.break_timer_running = False
+        self.destroy()
+        if self.break_slot and not getattr(self.break_slot, 'manual', False):
+            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
+                try:
+                    self.controller.main_window.reset_timer()
+                except Exception as e:
+                    print(f"DEBUG: Could not reset timer after skip: {e}")
+        elif getattr(self.break_slot, 'manual', False):
+            if self.was_timer_running:
                 if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
                     try:
                         self.controller.main_window.start_timer()
@@ -336,12 +300,16 @@ class BreakPopup(ctk.CTkToplevel):
             self.start_work_timer()
 
     def close_break(self):
-        """Close the popup and start work timer if auto start is enabled and not manual break. For manual break, resume work timer only if it was running before."""
         self.break_timer_running = False
         self.destroy()
-        if getattr(self.break_slot, 'manual', False):
-            # Resume work timer only if it was running before
-            if getattr(self, '_resume_work_after_manual_break', False):
+        if self.break_slot and not getattr(self.break_slot, 'manual', False):
+            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
+                try:
+                    self.controller.main_window.reset_timer()
+                except Exception as e:
+                    print(f"DEBUG: Could not reset timer after close: {e}")
+        elif getattr(self.break_slot, 'manual', False):
+            if self.was_timer_running:
                 if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
                     try:
                         self.controller.main_window.start_timer()
@@ -367,4 +335,4 @@ class BreakPopup(ctk.CTkToplevel):
             try:
                 self.controller.main_window.start_timer()
             except Exception as e:
-                print(f"DEBUG: Could not start work timer: {e}") 
+                print(f"DEBUG: Could not start work timer: {e}")

@@ -6,6 +6,36 @@ import time
 
 
 class MainWindow(ctk.CTk):
+    def show_break_notification(self):
+        """Show break popup when timer finishes (default break), always using duration from preferences/settings."""
+        try:
+            from src.views.break_popup import BreakPopup
+            settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+            break_duration = int(settings.get('break_duration', 1))
+            class DefaultBreakSlot:
+                duration = break_duration
+                scheduled = False
+            break_slot = DefaultBreakSlot()
+            occurrence_time = datetime.now()
+            popup = BreakPopup(self, self.controller)
+            popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
+        except Exception as e:
+            print(f"Error in show_break_notification: {e}")
+    def start_break_now(self) -> None:
+        """Trigger a manual break popup immediately, always using duration from preferences/settings."""
+        try:
+            from src.views.break_popup import BreakPopup
+            settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+            break_duration = int(settings.get('break_duration', 1))
+            class ManualBreakSlot:
+                duration = break_duration
+                scheduled = False
+            break_slot = ManualBreakSlot()
+            occurrence_time = datetime.now()
+            popup = BreakPopup(self, self.controller)
+            popup.set_break_info(break_slot, occurrence_time, manual_break=True, was_timer_running=self.timer_running)
+        except Exception as e:
+            print(f"Error in start_break_now: {e}")
     """Main application window."""
     
     def __init__(self, controller) -> None:
@@ -80,7 +110,7 @@ class MainWindow(ctk.CTk):
         button_frame.grid_columnconfigure(4, weight=1)
 
         # Start/Stop button
-        self.start_button = ctk.CTkButton(button_frame, text="Start", command=self.toggle_timer, width=80)
+        self.start_button = ctk.CTkButton(button_frame, text="Start Work", command=self.toggle_timer, width=80)
         self.start_button.grid(row=0, column=0, padx=3, pady=10, sticky="ew")
 
         # Reset button
@@ -233,108 +263,77 @@ class MainWindow(ctk.CTk):
         # Show break notification
         self.show_break_notification()
     
-    def start_break_now(self) -> None:
-        """Start a break immediately."""
-        # Track if timer was running before manual break
-        self._resume_work_after_manual_break = self.timer_running
-        # Stop current timer if running
-        if self.timer_running:
-            self.stop_timer()
-        settings = self.controller.get_settings()
-        # Use manual break duration for "Break Now" button
-        break_duration = settings.get('manual_break_duration', 15)
-        break_message = settings.get('break_message', 'Time for a break!')
-        # Show system notification if enabled
-        if settings.get('system_notifications', True):
-            from src.utils.platform import PlatformUtils
-            PlatformUtils.show_system_notification("Break Assistant", break_message)
-        # Play sound if enabled
-        if settings.get('sound_enabled', True):
-            self.controller.play_notification_sound()
-        # Show break popup with dynamic details
-        self.show_break_now_popup(break_duration, break_message)
-    
-    def show_break_now_popup(self, break_duration: int, break_message: str) -> None:
-        """Show break popup with dynamic details."""
-        from src.views.break_popup import BreakPopup
-        
-        # Create break slot for the popup
-        class BreakSlot:
-            def __init__(self, duration, message):
-                self.duration = duration
-                self.message = message
-        
-        break_slot = BreakSlot(break_duration, break_message)
-        break_slot.manual = True
-        
-        # Show popup, pass resume_work_after_manual_break flag
-        popup = BreakPopup(self, self.controller)
-        popup._resume_work_after_manual_break = getattr(self, '_resume_work_after_manual_break', False)
-        popup.set_break_info(break_slot, None)
-        # Popup is already visible from __init__
-    
-    def show_break_notification(self) -> None:
-        """Show break notification."""
-        from src.views.break_popup import BreakPopup
-        
-        # Get break duration from settings
-        settings = self.controller.get_settings()
-        break_duration = settings.get('break_duration', 5)
-        
-        # Create break slot for the popup
-        class BreakSlot:
-            def __init__(self, duration):
-                self.duration = duration
-        
-        break_slot = BreakSlot(break_duration)
-        
-        # Show popup
-        popup = BreakPopup(self, self.controller)
-        popup.set_break_info(break_slot, None)
-        # Popup is already visible from __init__
-    
+    def refresh_next_break_label(self):
+        """Show only: Next Scheduled break: Today/Tomorrow at xx:xx (xmin/mins) or 'No break scheduled'."""
+        try:
+            next_break = self.controller.get_next_break()
+            if next_break:
+                break_slot, occurrence_time = next_break
+                now = datetime.now()
+                if occurrence_time.date() == now.date():
+                    date_str = "Today"
+                elif occurrence_time.date() == now.date() + timedelta(days=1):
+                    date_str = "Tomorrow"
+                else:
+                    date_str = occurrence_time.strftime("%Y-%m-%d")
+                mins = int(getattr(break_slot, 'duration', 0))
+                min_label = "min" if mins == 1 else "mins"
+                time_str = occurrence_time.strftime("%H:%M")
+                self.next_break_label.configure(
+                    text=f"Next Scheduled break: {date_str} at {time_str} ({mins} {min_label})"
+                )
+            else:
+                self.next_break_label.configure(text="No break scheduled")
+        except Exception as e:
+            print(f"DEBUG: Error in refresh_next_break_label: {e}")
+
     def start_timeline_monitor(self) -> None:
-        """Start monitoring timeline for upcoming breaks."""
+        """Start monitoring timeline for upcoming breaks (scheduled breaks)."""
         def monitor_loop():
+            last_popup_timestamp = None
+            last_occurrence_time = None
+            last_break_id = None
             while True:
                 try:
                     next_break = self.controller.get_next_break()
                     if next_break:
-                        break_slot, occurrence_time = next_break
-                        self.current_break_slot = break_slot
+                        orig_break_slot, occurrence_time = next_break
+                        self.current_break_slot = orig_break_slot
                         self.next_break_time = occurrence_time
-                        # Update next break display
-                        time_str = occurrence_time.strftime("%H:%M")
-                        # Ensure scheduled attribute is present for timeline breaks
-                        if not hasattr(break_slot, 'scheduled'):
-                            break_slot.scheduled = True
-                        label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
-                        
-                        # Check if the break is today or tomorrow
                         now = datetime.now()
-                        if occurrence_time.date() == now.date():
-                            date_str = "Today"
-                        elif occurrence_time.date() == now.date() + timedelta(days=1):
-                            date_str = "Tomorrow"
-                        else:
-                            date_str = occurrence_time.strftime("%Y-%m-%d")
-                        
-                        display_text = f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
-                        self.next_break_label.configure(text=display_text)
-                        
-                        # Check if it's time for the break
+                        break_id = getattr(orig_break_slot, 'id', None) or occurrence_time.timestamp()
+                        if last_occurrence_time is None or occurrence_time != last_occurrence_time or last_break_id != break_id:
+                            last_popup_timestamp = None
+                            last_occurrence_time = occurrence_time
+                            last_break_id = break_id
                         if now >= occurrence_time:
-                            self.controller.show_break_notification(break_slot, occurrence_time)
-                    else:
-                        # No breaks scheduled
-                        self.next_break_label.configure(text="No breaks scheduled")
-                    
-                    # Refresh the display every 10 seconds instead of 30
+                            occ_ts = occurrence_time.timestamp()
+                            if last_popup_timestamp != occ_ts:
+                                duration = getattr(orig_break_slot, 'duration', None)
+                                if duration is None or duration <= 0:
+                                    settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                                    duration = int(settings.get('break_duration', 1))
+                                class ScheduledBreakSlot:
+                                    pass
+                                break_slot = ScheduledBreakSlot()
+                                for attr in dir(orig_break_slot):
+                                    if not attr.startswith('__') and not callable(getattr(orig_break_slot, attr)):
+                                        setattr(break_slot, attr, getattr(orig_break_slot, attr))
+                                break_slot.duration = duration
+                                # Use the exact break_message_var value from preferences for the popup message
+                                settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                                custom_message = settings.get('break_message', None)
+                                if custom_message:
+                                    break_slot.message = custom_message
+                                from src.views.break_popup import BreakPopup
+                                popup = BreakPopup(self, self.controller)
+                                popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
+                                last_popup_timestamp = occ_ts
                     time.sleep(10)
                     self.after(0, self.refresh_next_break_label)
                 except Exception as e:
                     print(f"Timeline monitor error: {e}")
-                    time.sleep(60)  # Wait longer on error
+                    time.sleep(60)
         monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
         monitor_thread.start()
     
@@ -359,7 +358,7 @@ class MainWindow(ctk.CTk):
                 else:
                     date_str = occurrence_time.strftime("%Y-%m-%d")
                 
-                display_text = f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                display_text = f"Next {label_type} break: {date_str} {time_str} ({break_slot.duration}min)"
                 self.next_break_label.configure(text=display_text)
                 print(f"DEBUG: Force refreshed next break label: {display_text}")
             else:
@@ -369,18 +368,11 @@ class MainWindow(ctk.CTk):
             print(f"DEBUG: Error in force_refresh_next_break: {e}")
     
     def refresh_next_break_label(self):
-        """Refresh the next break label (called by timeline monitor)."""
+        """Show only scheduled break: Today at xx:xx (xmin/mins) or 'No break scheduled'."""
         try:
             next_break = self.controller.get_next_break()
             if next_break:
                 break_slot, occurrence_time = next_break
-                time_str = occurrence_time.strftime("%H:%M")
-                # Ensure scheduled attribute is present for timeline breaks
-                if not hasattr(break_slot, 'scheduled'):
-                    break_slot.scheduled = True
-                label_type = 'scheduled' if getattr(break_slot, 'scheduled', False) else 'default'
-                
-                # Check if the break is today or tomorrow
                 now = datetime.now()
                 if occurrence_time.date() == now.date():
                     date_str = "Today"
@@ -388,12 +380,14 @@ class MainWindow(ctk.CTk):
                     date_str = "Tomorrow"
                 else:
                     date_str = occurrence_time.strftime("%Y-%m-%d")
-                
+                mins = int(getattr(break_slot, 'duration', 0))
+                min_label = "min" if mins == 1 else "mins"
+                time_str = occurrence_time.strftime("%H:%M")
                 self.next_break_label.configure(
-                    text=f"Next break: {date_str} {time_str} ({break_slot.duration}min {label_type})"
+                    text=f"Next Scheduled Break: {date_str} at {time_str} ({mins} {min_label})"
                 )
             else:
-                self.next_break_label.configure(text="No breaks scheduled")
+                self.next_break_label.configure(text="No break scheduled")
         except Exception as e:
             print(f"DEBUG: Error in refresh_next_break_label: {e}")
     
@@ -578,4 +572,4 @@ class MainWindow(ctk.CTk):
 
     def save_file(self):
         import tkinter.messagebox as messagebox
-        messagebox.showinfo("Save File", "Save file functionality coming soon.") 
+        messagebox.showinfo("Save File", "Save file functionality coming soon.")

@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 class AppController:
     """Main application controller."""
     
-    def __init__(self) -> None:
+    def __init__(self, timeline_file=None, settings_file=None) -> None:
         """Initialize application controller."""
         # Initialize managers
-        self.settings_manager = SettingsManager()
-        self.timeline_manager = TimelineManager()
+        self.settings_manager = SettingsManager(settings_file=settings_file)
+        self.timeline_manager = TimelineManager(timeline_file=timeline_file)
         self.audio_manager = AudioManager(self.settings_manager)
         self.theme_manager = ThemeManager()
         self.platform_utils = PlatformUtils()
@@ -95,26 +95,12 @@ class AppController:
         return self.platform_utils
     
     def get_next_break(self) -> tuple:
-        """Get the next break from timeline, or fallback to default if none scheduled."""
+        """Get the next break from timeline."""
         current_datetime = datetime.now()
         
         next_break = self.timeline_manager.get_next_break(current_datetime)
         
-        if next_break:
-            return next_break
-        
-        # Fallback: use default work/break duration from settings
-        work_duration = self.settings_manager.get("work_duration", 25)
-        break_duration = self.settings_manager.get("break_duration", 5)
-        
-        class PseudoBreakSlot:
-            def __init__(self, duration):
-                self.duration = duration
-                self.start_time = current_datetime
-                self.scheduled = False  # Mark as default break
-        pseudo_slot = PseudoBreakSlot(break_duration)
-        occurrence_time = current_datetime + timedelta(minutes=work_duration)
-        return (pseudo_slot, occurrence_time)
+        return next_break
     
     def play_notification_sound(self) -> None:
         """Play notification sound."""

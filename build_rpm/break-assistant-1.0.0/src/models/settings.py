@@ -8,9 +8,12 @@ os.makedirs(CONFIG_DIR, exist_ok=True)
 class SettingsManager:
     """Handles loading, saving, and managing user settings."""
     
-    def __init__(self) -> None:
+    def __init__(self, settings_file=None) -> None:
         self.settings: Dict[str, Any] = {}
-        self.settings_file = os.path.join(CONFIG_DIR, "settings.json")
+        if settings_file:
+            self.settings_file = settings_file
+        else:
+            self.settings_file = os.path.join(CONFIG_DIR, "settings.json")
     
     def get(self, key: str, default: Any = None) -> Any:
         """Get a setting value.

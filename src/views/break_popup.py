@@ -133,6 +133,12 @@ class BreakPopup(ctk.CTkToplevel):
                 self.break_info_label.configure(text=f"Time for your {break_slot.duration}-minute break!")
             self.break_remaining = break_slot.duration * 60
             self.update_timer_display()
+            # Play alert sound as soon as popup is shown
+            try:
+                if hasattr(self.controller, 'play_notification_sound'):
+                    self.controller.play_notification_sound()
+            except Exception as e:
+                print(f"DEBUG: Could not play break start sound: {e}")
             # If manual break (Break Now), start immediately
             if self.manual_break:
                 self.after(100, self.auto_start_break)
@@ -276,47 +282,20 @@ class BreakPopup(ctk.CTkToplevel):
             print(f"DEBUG: Could not play break end sound: {e}")
 
     def on_window_close(self):
-        """Safely close popup, never restart break or timer after break ends or on close."""
+        """Safely close popup, handle session and auto-start logic."""
         self.break_timer_running = False
         self.destroy()
+        self.handle_post_break_close()
 
     def skip_break(self):
         self.break_timer_running = False
         self.destroy()
-        if self.break_slot and not getattr(self.break_slot, 'manual', False):
-            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
-                try:
-                    self.controller.main_window.reset_timer()
-                except Exception as e:
-                    print(f"DEBUG: Could not reset timer after skip: {e}")
-        elif getattr(self.break_slot, 'manual', False):
-            if self.was_timer_running:
-                if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
-                    try:
-                        self.controller.main_window.start_timer()
-                    except Exception as e:
-                        print(f"DEBUG: Could not resume work timer after manual break: {e}")
-        elif self.should_auto_start():
-            self.start_work_timer()
+        self.handle_post_break_close()
 
     def close_break(self):
         self.break_timer_running = False
         self.destroy()
-        if self.break_slot and not getattr(self.break_slot, 'manual', False):
-            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
-                try:
-                    self.controller.main_window.reset_timer()
-                except Exception as e:
-                    print(f"DEBUG: Could not reset timer after close: {e}")
-        elif getattr(self.break_slot, 'manual', False):
-            if self.was_timer_running:
-                if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'start_timer'):
-                    try:
-                        self.controller.main_window.start_timer()
-                    except Exception as e:
-                        print(f"DEBUG: Could not resume work timer after manual break: {e}")
-        elif self.should_auto_start():
-            self.start_work_timer()
+        self.handle_post_break_close()
 
     def should_auto_start(self):
         """Return True if auto start next session is enabled in settings."""
@@ -324,6 +303,20 @@ class BreakPopup(ctk.CTkToplevel):
             settings = self.controller.get_settings()
             return bool(settings.get('auto_start', False))
         return False
+
+    def handle_post_break_close(self):
+        """Handle logic after break popup is closed (manual or default break)."""
+        if self.should_auto_start():
+            print("DEBUG: Auto-starting work session after break popup close.")
+            self.start_work_timer()
+        else:
+            print("DEBUG: Not auto-starting; resetting to work session.")
+            # Ensure main window is reset to work session
+            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
+                try:
+                    self.controller.main_window.reset_timer()
+                except Exception as e:
+                    print(f"DEBUG: Could not reset timer after break popup close: {e}")
 
     def dismiss(self) -> None:
         """Dismiss the popup (legacy, for compatibility)."""
