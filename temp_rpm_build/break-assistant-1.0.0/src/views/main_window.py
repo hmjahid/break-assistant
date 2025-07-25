@@ -12,9 +12,11 @@ class MainWindow(ctk.CTk):
             from src.views.break_popup import BreakPopup
             settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
             break_duration = int(settings.get('break_duration', 1))
+            break_message = settings.get('break_message', 'Time for your break!')
             class DefaultBreakSlot:
                 duration = break_duration
                 scheduled = False
+                message = break_message
             break_slot = DefaultBreakSlot()
             occurrence_time = datetime.now()
             popup = BreakPopup(self, self.controller)
@@ -22,14 +24,20 @@ class MainWindow(ctk.CTk):
         except Exception as e:
             print(f"Error in show_break_notification: {e}")
     def start_break_now(self) -> None:
-        """Trigger a manual break popup immediately, always using duration from preferences/settings."""
+        """
+        Trigger a manual break popup immediately, always using duration and custom message from preferences/settings. Also pause work timer.
+        """
         try:
             from src.views.break_popup import BreakPopup
             settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
-            break_duration = int(settings.get('break_duration', 1))
+            break_duration = int(settings.get('manual_break_duration', 15))
+            break_message = settings.get('break_message', 'Time for a break!')
+            # Pause work timer if running
+            self.stop_timer()
             class ManualBreakSlot:
                 duration = break_duration
                 scheduled = False
+                message = break_message
             break_slot = ManualBreakSlot()
             occurrence_time = datetime.now()
             popup = BreakPopup(self, self.controller)
