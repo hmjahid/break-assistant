@@ -282,19 +282,48 @@ class BreakPopup(ctk.CTkToplevel):
             print(f"DEBUG: Could not play break end sound: {e}")
 
     def on_window_close(self):
-        """Safely close popup, handle session and auto-start logic."""
-        self.break_timer_running = False
-        self.destroy()
+        """Safely close popup, handle session and auto-start logic. Always force destroy."""
+        try:
+            self.break_timer_running = False
+            self.destroy()
+        except Exception as e:
+            print(f"DEBUG: Exception in on_window_close destroy: {e}")
+            try:
+                self.after(100, self._force_destroy)
+            except Exception:
+                pass
         self.handle_post_break_close()
 
+    def _force_destroy(self):
+        try:
+            self.quit()
+            self.destroy()
+        except Exception as e:
+            print(f"DEBUG: Exception in _force_destroy: {e}")
+
+
     def skip_break(self):
-        self.break_timer_running = False
-        self.destroy()
+        try:
+            self.break_timer_running = False
+            self.destroy()
+        except Exception as e:
+            print(f"DEBUG: Exception in skip_break destroy: {e}")
+            try:
+                self.after(100, self._force_destroy)
+            except Exception:
+                pass
         self.handle_post_break_close()
 
     def close_break(self):
-        self.break_timer_running = False
-        self.destroy()
+        try:
+            self.break_timer_running = False
+            self.destroy()
+        except Exception as e:
+            print(f"DEBUG: Exception in close_break destroy: {e}")
+            try:
+                self.after(100, self._force_destroy)
+            except Exception:
+                pass
         self.handle_post_break_close()
 
     def should_auto_start(self):
