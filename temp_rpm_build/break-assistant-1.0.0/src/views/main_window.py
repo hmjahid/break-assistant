@@ -334,8 +334,15 @@ class MainWindow(ctk.CTk):
                                 if custom_message:
                                     break_slot.message = custom_message
                                 from src.views.break_popup import BreakPopup
-                                popup = BreakPopup(self, self.controller)
-                                popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
+                                def show_scheduled_break():
+                                    print("DEBUG: Creating scheduled BreakPopup from main thread")
+                                    popup = BreakPopup(self, self.controller)
+                                    popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
+                                if threading.current_thread() is threading.main_thread():
+                                    show_scheduled_break()
+                                else:
+                                    print("DEBUG: Scheduling BreakPopup creation on main thread using after(0, ...)")
+                                    self.after(0, show_scheduled_break)
                                 last_popup_timestamp = occ_ts
                     time.sleep(10)
                     self.after(0, self.refresh_next_break_label)

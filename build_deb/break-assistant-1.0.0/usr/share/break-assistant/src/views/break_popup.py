@@ -283,16 +283,26 @@ class BreakPopup(ctk.CTkToplevel):
 
     def on_window_close(self):
         """Safely close popup, handle session and auto-start logic. Always force destroy."""
-        try:
-            self.break_timer_running = False
-            self.destroy()
-        except Exception as e:
-            print(f"DEBUG: Exception in on_window_close destroy: {e}")
+        print("DEBUG: on_window_close called")
+        def do_close():
             try:
-                self.after(100, self._force_destroy)
-            except Exception:
-                pass
-        self.handle_post_break_close()
+                self.break_timer_running = False
+                self.destroy()
+            except Exception as e:
+                print(f"DEBUG: Exception in on_window_close destroy: {e}")
+                try:
+                    self.after(100, self._force_destroy)
+                except Exception:
+                    pass
+            self.handle_post_break_close()
+        try:
+            if threading.current_thread() is threading.main_thread():
+                do_close()
+            else:
+                print("DEBUG: on_window_close called from non-main thread, using after(0, ...)")
+                self.after(0, do_close)
+        except Exception as e:
+            print(f"DEBUG: Exception in on_window_close outer: {e}")
 
     def _force_destroy(self):
         try:
@@ -303,28 +313,48 @@ class BreakPopup(ctk.CTkToplevel):
 
 
     def skip_break(self):
-        try:
-            self.break_timer_running = False
-            self.destroy()
-        except Exception as e:
-            print(f"DEBUG: Exception in skip_break destroy: {e}")
+        print("DEBUG: skip_break called")
+        def do_skip():
             try:
-                self.after(100, self._force_destroy)
-            except Exception:
-                pass
-        self.handle_post_break_close()
+                self.break_timer_running = False
+                self.destroy()
+            except Exception as e:
+                print(f"DEBUG: Exception in skip_break destroy: {e}")
+                try:
+                    self.after(100, self._force_destroy)
+                except Exception:
+                    pass
+            self.handle_post_break_close()
+        try:
+            if threading.current_thread() is threading.main_thread():
+                do_skip()
+            else:
+                print("DEBUG: skip_break called from non-main thread, using after(0, ...)")
+                self.after(0, do_skip)
+        except Exception as e:
+            print(f"DEBUG: Exception in skip_break outer: {e}")
 
     def close_break(self):
-        try:
-            self.break_timer_running = False
-            self.destroy()
-        except Exception as e:
-            print(f"DEBUG: Exception in close_break destroy: {e}")
+        print("DEBUG: close_break called")
+        def do_close():
             try:
-                self.after(100, self._force_destroy)
-            except Exception:
-                pass
-        self.handle_post_break_close()
+                self.break_timer_running = False
+                self.destroy()
+            except Exception as e:
+                print(f"DEBUG: Exception in close_break destroy: {e}")
+                try:
+                    self.after(100, self._force_destroy)
+                except Exception:
+                    pass
+            self.handle_post_break_close()
+        try:
+            if threading.current_thread() is threading.main_thread():
+                do_close()
+            else:
+                print("DEBUG: close_break called from non-main thread, using after(0, ...)")
+                self.after(0, do_close)
+        except Exception as e:
+            print(f"DEBUG: Exception in close_break outer: {e}")
 
     def should_auto_start(self):
         """Return True if auto start next session is enabled in settings."""
