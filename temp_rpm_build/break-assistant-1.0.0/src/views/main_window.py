@@ -349,6 +349,7 @@ class MainWindow(ctk.CTk):
                 except Exception as e:
                     print(f"Timeline monitor error: {e}")
                     time.sleep(60)
+        print("DEBUG: Starting timeline monitor thread for scheduled breaks")
         monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
         monitor_thread.start()
     

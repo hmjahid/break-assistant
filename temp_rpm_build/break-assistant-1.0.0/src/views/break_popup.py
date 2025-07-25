@@ -14,22 +14,19 @@ class BreakPopup(ctk.CTkToplevel):
         self.title("Break Time!")
         self.geometry("500x510")  # Increased height by 10px from 500 to 510
         self.resizable(False, False)
-        # Make modal but don't grab immediately
+        # Make modal and grab set
         self.transient(master)
-        # Center the window
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (500 // 2)
-        y = (self.winfo_screenheight() // 2) - (510 // 2)  # Updated for new height
-        self.geometry(f"500x510+{x}+{y}")  # Updated height
-        # Make visible first, then grab
+        y = (self.winfo_screenheight() // 2) - (510 // 2)
+        self.geometry(f"500x510+{x}+{y}")
         self.deiconify()
         self.lift()
-        # self.focus_force()
-        # Now try to grab after window is visible
-        # try:
-        #     self.grab_set()
-        # except Exception as e:
-        #     print(f"Warning: Could not grab popup: {e}")
+        self.focus_force()
+        try:
+            self.grab_set()
+        except Exception as e:
+            print(f"Warning: Could not grab popup: {e}")
         self.break_slot = None
         self.occurrence_time = None
         self.break_timer_running = False
@@ -136,17 +133,22 @@ class BreakPopup(ctk.CTkToplevel):
                     self.controller.play_notification_sound()
             except Exception as e:
                 print(f"DEBUG: Could not play break start sound: {e}")
-            # If manual break (Break Now), start immediately
+            # Always enable skip and close buttons
+            self.skip_button.grid()
+            self.close_button.grid()
+            # For manual break (Break Now), start immediately
             if self.manual_break:
                 self.after(100, self.auto_start_break)
                 self.start_button.configure(text="Pause", command=self.pause_break, state="normal")
                 self.stop_button.configure(state="normal")
             else:
-                # For default/scheduled, do not auto start
+                # For default/scheduled, do not auto start, but ensure timer is reset and buttons are correct
                 self.start_button.configure(text="Start Break", command=self.start_break, state="normal")
                 self.stop_button.configure(state="disabled")
-            self.skip_button.grid()
-            self.close_button.grid()
+                # Ensure timer and labels are reset for default/scheduled
+                self.break_timer_running = False
+                self.break_start_time = None
+                self.update_timer_display()
         else:
             self.break_info_label.configure(text="Time for your break!")
     
@@ -292,6 +294,8 @@ class BreakPopup(ctk.CTkToplevel):
         def do_close():
             try:
                 self.break_timer_running = False
+                print("DEBUG: Destroying popup window via WM_DELETE_WINDOW")
+                self.grab_release()
                 self.destroy()
             except Exception as e:
                 print(f"DEBUG: Exception in on_window_close destroy: {e}")
@@ -322,6 +326,8 @@ class BreakPopup(ctk.CTkToplevel):
         def do_skip():
             try:
                 self.break_timer_running = False
+                print("DEBUG: Destroying popup window via skip_break")
+                self.grab_release()
                 self.destroy()
             except Exception as e:
                 print(f"DEBUG: Exception in skip_break destroy: {e}")
@@ -344,6 +350,8 @@ class BreakPopup(ctk.CTkToplevel):
         def do_close():
             try:
                 self.break_timer_running = False
+                print("DEBUG: Destroying popup window via close_break")
+                self.grab_release()
                 self.destroy()
             except Exception as e:
                 print(f"DEBUG: Exception in close_break destroy: {e}")
