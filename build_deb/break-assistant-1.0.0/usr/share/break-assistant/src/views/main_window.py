@@ -77,8 +77,8 @@ class MainWindow(ctk.CTk):
         super().__init__()
         self.controller = controller
         self.title("Break Assistant")
-        self.geometry("500x400")  # Match break popup width
-        self.minsize(500, 300)  # Keep min width at 500
+        self.geometry("500x432")  # Match break popup width
+        self.minsize(500, 420)  # Keep min width at 500
         
         # Timer variables
         self.timer_running = False
@@ -97,75 +97,62 @@ class MainWindow(ctk.CTk):
         # Configure grid
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
-        
+
         # Title
-        title_label = ctk.CTkLabel(self, text="Break Assistant", 
-                                  font=ctk.CTkFont(size=24, weight="bold"))
-        title_label.grid(row=0, column=0, pady=(20, 10), sticky="ew")
-        
+        title_label = ctk.CTkLabel(self, text="Break Assistant", font=ctk.CTkFont(size=24, weight="bold"))
+        title_label.grid(row=0, column=0, pady=(10, 5), sticky="ew")
+
         # Main content frame
-        main_frame = ctk.CTkFrame(self)
-        main_frame.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+        main_frame = ctk.CTkFrame(self, fg_color=("gray85", "gray17"))
+        main_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
-        main_frame.grid_rowconfigure(1, weight=1)
-        
-        # Status section
-        status_frame = ctk.CTkFrame(main_frame)
-        status_frame.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
-        
-        self.status_label = ctk.CTkLabel(status_frame, text="Ready", 
-                                        font=ctk.CTkFont(size=16))
-        self.status_label.pack(pady=10)
-        
-        # Timer display
-        timer_frame = ctk.CTkFrame(main_frame)
-        timer_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
-        
-        self.timer_label = ctk.CTkLabel(timer_frame, text="--:--", 
-                                       font=ctk.CTkFont(size=32, weight="bold"))
-        self.timer_label.pack(pady=20)
-        
+
+        # Status Label
+        self.status_label = ctk.CTkLabel(main_frame, text="🎯 Ready", font=ctk.CTkFont(size=18, weight="bold"), text_color=("#2E7D32", "#66BB6A"))
+        self.status_label.grid(row=0, column=0, pady=(10, 5), padx=20, sticky="ew")
+
+        # Main Timer Display
+        self.timer_label = ctk.CTkLabel(main_frame, text="--:--", font=ctk.CTkFont(size=48, weight="bold"), text_color=("#1565C0", "#42A5F5"))
+        self.timer_label.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="ew")
+
         # Progress bar
-        self.progress_bar = ctk.CTkProgressBar(timer_frame)
-        self.progress_bar.pack(pady=(0, 20), padx=20, fill="x")
+        self.progress_bar = ctk.CTkProgressBar(main_frame, height=12, progress_color=("#4CAF50", "#66BB6A"))
+        self.progress_bar.grid(row=2, column=0, padx=40, pady=(0, 15), sticky="ew")
         self.progress_bar.set(0)
-        
-        # Control buttons
-        button_frame = ctk.CTkFrame(main_frame)
-        button_frame.grid(row=2, column=0, padx=10, pady=(5, 10), sticky="ew")
-        button_frame.grid_columnconfigure(0, weight=1)
-        button_frame.grid_columnconfigure(1, weight=1)
-        button_frame.grid_columnconfigure(2, weight=1)
-        button_frame.grid_columnconfigure(3, weight=1)
-        button_frame.grid_columnconfigure(4, weight=1)
+
+        # Button frame
+        button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        button_frame.grid(row=3, column=0, pady=4, padx=20, sticky="ew")
+        button_frame.grid_columnconfigure((0, 1), weight=1)
 
         # Start/Stop button
-        self.start_button = ctk.CTkButton(button_frame, text="Start Work", command=self.toggle_timer, width=80)
-        self.start_button.grid(row=0, column=0, padx=3, pady=10, sticky="ew")
+        self.start_button = ctk.CTkButton(button_frame, text="▶️ Start Work", command=self.toggle_timer, width=140, height=35, font=ctk.CTkFont(size=13, weight="bold"), fg_color=("#2E7D32", "#4CAF50"), hover_color=("#1B5E20", "#388E3C"))
+        self.start_button.grid(row=0, column=0, padx=5, pady=4, sticky="ew")
 
         # Reset button
-        reset_button = ctk.CTkButton(button_frame, text="Reset", command=self.reset_timer, width=80)
-        reset_button.grid(row=0, column=1, padx=3, pady=10, sticky="ew")
+        reset_button = ctk.CTkButton(button_frame, text="🔄 Reset", command=self.reset_timer, width=140, height=35, font=ctk.CTkFont(size=13, weight="bold"), fg_color=("#F57C00", "#FF9800"), hover_color=("#E65100", "#F57C00"))
+        reset_button.grid(row=0, column=1, padx=5, pady=4, sticky="ew")
 
         # Break Now button
-        break_now_button = ctk.CTkButton(button_frame, text="Break Now", command=self.start_break_now, width=80)
-        break_now_button.grid(row=0, column=2, padx=3, pady=10, sticky="ew")
+        break_now_button = ctk.CTkButton(main_frame, text="🚨 Break Now", command=self.start_break_now, height=40, font=ctk.CTkFont(size=14, weight="bold"), fg_color=("#D32F2F", "#F44336"), hover_color=("#B71C1C", "#D32F2F"))
+        break_now_button.grid(row=4, column=0, padx=25, pady=4, sticky="ew")
+
+        # Settings button frame
+        settings_button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        settings_button_frame.grid(row=5, column=0, pady=4, padx=20, sticky="ew")
+        settings_button_frame.grid_columnconfigure((0, 1), weight=1)
 
         # Timeline button
-        timeline_button = ctk.CTkButton(button_frame, text="Timeline", command=self.open_timeline, width=80)
-        timeline_button.grid(row=0, column=3, padx=3, pady=10, sticky="ew")
+        timeline_button = ctk.CTkButton(settings_button_frame, text="📅 Timeline", command=self.open_timeline, width=140, height=35, font=ctk.CTkFont(size=13, weight="bold"), fg_color=("#7B1FA2", "#9C27B0"), hover_color=("#4A148C", "#7B1FA2"))
+        timeline_button.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
 
         # Preferences button
-        preferences_button = ctk.CTkButton(button_frame, text="Preferences", command=self.open_preferences, width=80)
-        preferences_button.grid(row=0, column=4, padx=3, pady=10, sticky="ew")
-        
-        # Bottom info frame
-        info_frame = ctk.CTkFrame(main_frame)
-        info_frame.grid(row=3, column=0, padx=10, pady=(0, 10), sticky="ew")
-        
-        self.next_break_label = ctk.CTkLabel(info_frame, text="No breaks scheduled", 
-                                            font=ctk.CTkFont(size=12))
-        self.next_break_label.pack(pady=5)
+        preferences_button = ctk.CTkButton(settings_button_frame, text="⚙️ Preferences", command=self.open_preferences, width=140, height=35, font=ctk.CTkFont(size=13, weight="bold"), fg_color=("#455A64", "#607D8B"), hover_color=("#263238", "#455A64"))
+        preferences_button.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
+
+        # Next Break Label
+        self.next_break_label = ctk.CTkLabel(main_frame, text="No breaks scheduled", font=ctk.CTkFont(size=12), text_color=("gray20", "gray80"))
+        self.next_break_label.grid(row=6, column=0, pady=(15, 10), padx=20, sticky="ew")
         
         # Menu bar
         self.setup_menu()
@@ -237,8 +224,8 @@ class MainWindow(ctk.CTk):
         if not self.timer_running:
             self.timer_running = True
             self.timer_start_time = datetime.now()
-            self.start_button.configure(text="Stop")
-            self.status_label.configure(text="Working...")
+            self.start_button.configure(text="⏸️ Stop")
+            self.status_label.configure(text="💼 Working...", text_color=("#1565C0", "#42A5F5"))
             
             # Start timer thread
             self.timer_thread = threading.Thread(target=self.timer_loop, daemon=True)
@@ -248,8 +235,8 @@ class MainWindow(ctk.CTk):
         """Stop the timer."""
         if self.timer_running:
             self.timer_running = False
-            self.start_button.configure(text="Start")
-            self.status_label.configure(text="Paused")
+            self.start_button.configure(text="▶️ Start Work")
+            self.status_label.configure(text="⏸️ Paused", text_color=("#F57C00", "#FF9800"))
     
     def reset_timer(self) -> None:
         """Reset the timer."""
@@ -257,7 +244,7 @@ class MainWindow(ctk.CTk):
         self.timer_remaining = self.timer_duration
         self.update_timer_display()
         self.progress_bar.set(0)
-        self.status_label.configure(text="Ready")
+        self.status_label.configure(text="🎯 Ready", text_color=("#2E7D32", "#4CAF50"))
     
     def timer_loop(self) -> None:
         """Timer loop running in separate thread."""
@@ -274,6 +261,8 @@ class MainWindow(ctk.CTk):
     
     def update_timer_display(self) -> None:
         """Update timer display."""
+        if not self.winfo_exists():  # Check if the window exists
+            return
         timer_remaining = int(self.timer_remaining)
         timer_duration = int(self.timer_duration)
         minutes = timer_remaining // 60
@@ -281,14 +270,17 @@ class MainWindow(ctk.CTk):
         self.timer_label.configure(text=f"{minutes:02d}:{seconds:02d}")
         
         # Update progress bar
-        progress = 1 - (timer_remaining / timer_duration)
-        self.progress_bar.set(progress)
+        if timer_duration > 0:
+            progress = 1 - (timer_remaining / timer_duration)
+            self.progress_bar.set(progress)
+        else:
+            self.progress_bar.set(0)
     
     def timer_finished(self) -> None:
         """Handle timer completion."""
         self.timer_running = False
-        self.start_button.configure(text="Start Work")
-        self.status_label.configure(text="Break time!")
+        self.start_button.configure(text="▶️ Start Work")
+        self.status_label.configure(text="🎉 Break time!", text_color=("#D32F2F", "#F44336"))
         
         # Reset timer to prevent continuous triggering
         self.timer_remaining = self.timer_duration
