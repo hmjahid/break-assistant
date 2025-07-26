@@ -348,11 +348,15 @@ class BreakPopup(ctk.CTkToplevel):
     def handle_post_break_close(self):
         """Handle logic after break popup is closed (manual or default break)."""
         try:
-            if self.should_auto_start():
-                print("DEBUG: Auto-starting work session after break popup close.")
+            # Only auto-start if auto-start is enabled AND the work timer was actually interrupted by this break
+            if self.should_auto_start() and getattr(self, 'was_timer_running', False):
+                print("DEBUG: Auto-starting work session after break popup close (timer was interrupted).")
                 self.start_work_timer()
             else:
-                print("DEBUG: Not auto-starting; resetting to work session.")
+                if not getattr(self, 'was_timer_running', False):
+                    print("DEBUG: Not auto-starting; work timer was not running when break started.")
+                else:
+                    print("DEBUG: Not auto-starting; auto-start disabled in settings.")
                 # Ensure main window is reset to work session
                 if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
                     try:

@@ -13,6 +13,17 @@ class MainWindow(ctk.CTk):
             settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
             break_duration = int(settings.get('break_duration', 1))
             break_message = settings.get('break_message', 'Time for your break!')
+            
+            # Show system notification if enabled
+            system_notifications = settings.get('system_notifications', True)
+            if system_notifications:
+                try:
+                    platform_utils = self.controller.get_platform_utils()
+                    platform_utils.show_system_notification("Break Time!", break_message)
+                    print("DEBUG: System notification shown for default break")
+                except Exception as e:
+                    print(f"DEBUG: Could not show system notification: {e}")
+            
             class DefaultBreakSlot:
                 duration = break_duration
                 scheduled = False
@@ -32,6 +43,17 @@ class MainWindow(ctk.CTk):
             settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
             break_duration = int(settings.get('manual_break_duration', 15))
             break_message = settings.get('break_message', 'Time for a break!')
+            
+            # Show system notification if enabled
+            system_notifications = settings.get('system_notifications', True)
+            if system_notifications:
+                try:
+                    platform_utils = self.controller.get_platform_utils()
+                    platform_utils.show_system_notification("Manual Break", break_message)
+                    print("DEBUG: System notification shown for manual break")
+                except Exception as e:
+                    print(f"DEBUG: Could not show system notification: {e}")
+            
             # Pause work timer if running
             self.stop_timer()
             class ManualBreakSlot:
@@ -360,18 +382,44 @@ class MainWindow(ctk.CTk):
                                 # Ensure duration is set
                                 break_slot.duration = duration
                                 
-                                # Use custom message from settings if available
-                                settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
-                                custom_message = settings.get('break_message', None)
-                                if custom_message and custom_message.strip():
-                                    break_slot.message = custom_message
-                                elif not hasattr(break_slot, 'message') or not break_slot.message:
-                                    break_slot.message = f"Time for your {duration}-minute break!"
+                                # For scheduled breaks, preserve the timeline custom message if it exists
+                                # Only use preferences message as fallback if no timeline message is set
+                                timeline_message = getattr(orig_break_slot, 'message', None)
+                                if timeline_message and timeline_message.strip():
+                                    # Use the custom message from timeline
+                                    break_slot.message = timeline_message
+                                    print(f"DEBUG: Using timeline custom message: {timeline_message}")
+                                else:
+                                    # No timeline message, use preferences message as fallback
+                                    settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                                    preferences_message = settings.get('break_message', None)
+                                    if preferences_message and preferences_message.strip():
+                                        break_slot.message = preferences_message
+                                        print(f"DEBUG: Using preferences message as fallback: {preferences_message}")
+                                    else:
+                                        # No custom messages, use default
+                                        break_slot.message = f"Time for your {duration}-minute break!"
+                                        print(f"DEBUG: Using default message")
                                 
                                 # Show the scheduled break popup
                                 def show_scheduled_break():
                                     try:
                                         print("DEBUG: Creating scheduled BreakPopup")
+                                        
+                                        # Show system notification if enabled
+                                        settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
+                                        system_notifications = settings.get('system_notifications', True)
+                                        if system_notifications:
+                                            try:
+                                                platform_utils = self.controller.get_platform_utils()
+                                                # Use the custom message from the scheduled break if available
+                                                notification_message = getattr(break_slot, 'message', None)
+                                                if not notification_message or not notification_message.strip():
+                                                    notification_message = f"Time for your {break_slot.duration}-minute break!"
+                                                platform_utils.show_system_notification("Scheduled Break", notification_message)
+                                                print("DEBUG: System notification shown for scheduled break")
+                                            except Exception as e:
+                                                print(f"DEBUG: Could not show system notification: {e}")
                                         
                                         # Pause work timer if it's running when scheduled break appears
                                         was_timer_running = self.timer_running
