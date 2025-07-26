@@ -265,8 +265,13 @@ class MainWindow(ctk.CTk):
     def timer_finished(self) -> None:
         """Handle timer completion."""
         self.timer_running = False
-        self.start_button.configure(text="Start")
+        self.start_button.configure(text="Start Work")
         self.status_label.configure(text="Break time!")
+        
+        # Reset timer to prevent continuous triggering
+        self.timer_remaining = self.timer_duration
+        self.update_timer_display()
+        self.progress_bar.set(0)
         
         # Show break notification
         self.show_break_notification()
@@ -301,54 +306,108 @@ class MainWindow(ctk.CTk):
             last_popup_timestamp = None
             last_occurrence_time = None
             last_break_id = None
+            
+            print("DEBUG: Timeline monitor started")
+            
             while True:
                 try:
+                    # Get next break from timeline
                     next_break = self.controller.get_next_break()
+                    
                     if next_break:
                         orig_break_slot, occurrence_time = next_break
                         self.current_break_slot = orig_break_slot
                         self.next_break_time = occurrence_time
                         now = datetime.now()
-                        break_id = getattr(orig_break_slot, 'id', None) or occurrence_time.timestamp()
+                        
+                        # Generate unique break ID
+                        break_id = getattr(orig_break_slot, 'id', None) or f"{occurrence_time.timestamp()}_{orig_break_slot.duration}"
+                        
+                        print(f"DEBUG: Next break found - ID: {break_id}, Time: {occurrence_time}, Now: {now}")
+                        
+                        # Reset popup tracking if this is a new break
                         if last_occurrence_time is None or occurrence_time != last_occurrence_time or last_break_id != break_id:
                             last_popup_timestamp = None
                             last_occurrence_time = occurrence_time
                             last_break_id = break_id
-                        if now >= occurrence_time:
+                            print(f"DEBUG: New break detected, reset popup tracking")
+                        
+                        # Check if it's time to show the break (with 30-second tolerance)
+                        time_diff = (occurrence_time - now).total_seconds()
+                        if time_diff <= 30 and time_diff >= -30:  # Show break within 30 seconds of scheduled time
                             occ_ts = occurrence_time.timestamp()
                             if last_popup_timestamp != occ_ts:
+                                print(f"DEBUG: Time to show scheduled break! Time diff: {time_diff} seconds")
+                                
+                                # Prepare break slot with proper duration
                                 duration = getattr(orig_break_slot, 'duration', None)
                                 if duration is None or duration <= 0:
                                     settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
-                                    duration = int(settings.get('break_duration', 1))
+                                    duration = int(settings.get('break_duration', 5))
+                                
+                                # Create a copy of the break slot with proper attributes
                                 class ScheduledBreakSlot:
-                                    pass
+                                    def __init__(self):
+                                        self.scheduled = True
+                                
                                 break_slot = ScheduledBreakSlot()
-                                for attr in dir(orig_break_slot):
-                                    if not attr.startswith('__') and not callable(getattr(orig_break_slot, attr)):
+                                
+                                # Copy all attributes from original break slot
+                                for attr in ['start_time', 'duration', 'message', 'repeat_pattern', 'enabled', 'id']:
+                                    if hasattr(orig_break_slot, attr):
                                         setattr(break_slot, attr, getattr(orig_break_slot, attr))
+                                
+                                # Ensure duration is set
                                 break_slot.duration = duration
-                                # Use the exact break_message_var value from preferences for the popup message
+                                
+                                # Use custom message from settings if available
                                 settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
                                 custom_message = settings.get('break_message', None)
-                                if custom_message:
+                                if custom_message and custom_message.strip():
                                     break_slot.message = custom_message
-                                from src.views.break_popup import BreakPopup
+                                elif not hasattr(break_slot, 'message') or not break_slot.message:
+                                    break_slot.message = f"Time for your {duration}-minute break!"
+                                
+                                # Show the scheduled break popup
                                 def show_scheduled_break():
-                                    print("DEBUG: Creating scheduled BreakPopup from main thread")
-                                    popup = BreakPopup(self, self.controller)
-                                    popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=self.timer_running)
-                                if threading.current_thread() is threading.main_thread():
-                                    show_scheduled_break()
-                                else:
-                                    print("DEBUG: Scheduling BreakPopup creation on main thread using after(0, ...)")
-                                    self.after(0, show_scheduled_break)
+                                    try:
+                                        print("DEBUG: Creating scheduled BreakPopup")
+                                        
+                                        # Pause work timer if it's running when scheduled break appears
+                                        was_timer_running = self.timer_running
+                                        if self.timer_running:
+                                            print("DEBUG: Pausing work timer for scheduled break")
+                                            self.stop_timer()
+                                        
+                                        from src.views.break_popup import BreakPopup
+                                        popup = BreakPopup(self, self.controller)
+                                        popup.set_break_info(break_slot, occurrence_time, manual_break=False, was_timer_running=was_timer_running)
+                                        print("DEBUG: Scheduled BreakPopup created successfully")
+                                    except Exception as e:
+                                        print(f"DEBUG: Error creating scheduled break popup: {e}")
+                                
+                                # Schedule popup creation on main thread
+                                self.after(0, show_scheduled_break)
                                 last_popup_timestamp = occ_ts
-                    time.sleep(10)
+                                print(f"DEBUG: Scheduled break popup queued for display")
+                        else:
+                            if time_diff > 30:
+                                print(f"DEBUG: Break scheduled in {time_diff:.0f} seconds")
+                    else:
+                        print("DEBUG: No scheduled breaks found")
+                    
+                    # Update the next break label
                     self.after(0, self.refresh_next_break_label)
+                    
+                    # Sleep for 5 seconds before checking again
+                    time.sleep(5)
+                    
                 except Exception as e:
-                    print(f"Timeline monitor error: {e}")
-                    time.sleep(60)
+                    print(f"DEBUG: Timeline monitor error: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    time.sleep(30)  # Wait longer on error
+        
         print("DEBUG: Starting timeline monitor thread for scheduled breaks")
         monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
         monitor_thread.start()

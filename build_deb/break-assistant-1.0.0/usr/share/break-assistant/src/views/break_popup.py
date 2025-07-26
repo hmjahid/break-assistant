@@ -23,10 +23,15 @@ class BreakPopup(ctk.CTkToplevel):
         self.deiconify()
         self.lift()
         self.focus_force()
-        try:
-            self.grab_set()
-        except Exception as e:
-            print(f"Warning: Could not grab popup: {e}")
+        # Only call grab_set if window is viewable
+        self.update_idletasks()
+        if self.winfo_viewable():
+            try:
+                self.grab_set()
+            except Exception as e:
+                print(f"Warning: Could not grab popup: {e}")
+        else:
+            print("DEBUG: BreakPopup not viewable, skipping grab_set")
         self.break_slot = None
         self.occurrence_time = None
         self.break_timer_running = False
@@ -126,6 +131,11 @@ class BreakPopup(ctk.CTkToplevel):
             else:
                 self.break_info_label.configure(text=f"Time for your {break_slot.duration}-minute break!")
             self.break_remaining = break_slot.duration * 60
+            # Always reset timer and labels for default/scheduled popups
+            self.break_timer_running = False
+            self.break_start_time = None
+            self.start_time_label.configure(text="Start: --:--")
+            self.end_time_label.configure(text="End: --:--")
             self.update_timer_display()
             # Play alert sound as soon as popup is shown
             try:
@@ -145,10 +155,6 @@ class BreakPopup(ctk.CTkToplevel):
                 # For default/scheduled, do not auto start, but ensure timer is reset and buttons are correct
                 self.start_button.configure(text="Start Break", command=self.start_break, state="normal")
                 self.stop_button.configure(state="disabled")
-                # Ensure timer and labels are reset for default/scheduled
-                self.break_timer_running = False
-                self.break_start_time = None
-                self.update_timer_display()
         else:
             self.break_info_label.configure(text="Time for your break!")
     
@@ -289,85 +295,48 @@ class BreakPopup(ctk.CTkToplevel):
             print(f"DEBUG: Could not play break end sound: {e}")
 
     def on_window_close(self):
-        """Safely close popup, handle session and auto-start logic. Always force destroy."""
+        """Handle window close event (X button)."""
         print("DEBUG: on_window_close called")
-        def do_close():
-            try:
-                self.break_timer_running = False
-                print("DEBUG: Destroying popup window via WM_DELETE_WINDOW")
-                self.grab_release()
-                self.destroy()
-            except Exception as e:
-                print(f"DEBUG: Exception in on_window_close destroy: {e}")
-                try:
-                    self.after(100, self._force_destroy)
-                except Exception:
-                    pass
-            self.handle_post_break_close()
-        try:
-            if threading.current_thread() is threading.main_thread():
-                do_close()
-            else:
-                print("DEBUG: on_window_close called from non-main thread, using after(0, ...)")
-                self.after(0, do_close)
-        except Exception as e:
-            print(f"DEBUG: Exception in on_window_close outer: {e}")
-
-    def _force_destroy(self):
-        try:
-            self.quit()
-            self.destroy()
-        except Exception as e:
-            print(f"DEBUG: Exception in _force_destroy: {e}")
-
+        self._close_popup()
 
     def skip_break(self):
+        """Handle skip button click."""
         print("DEBUG: skip_break called")
-        def do_skip():
-            try:
-                self.break_timer_running = False
-                print("DEBUG: Destroying popup window via skip_break")
-                self.grab_release()
-                self.destroy()
-            except Exception as e:
-                print(f"DEBUG: Exception in skip_break destroy: {e}")
-                try:
-                    self.after(100, self._force_destroy)
-                except Exception:
-                    pass
-            self.handle_post_break_close()
-        try:
-            if threading.current_thread() is threading.main_thread():
-                do_skip()
-            else:
-                print("DEBUG: skip_break called from non-main thread, using after(0, ...)")
-                self.after(0, do_skip)
-        except Exception as e:
-            print(f"DEBUG: Exception in skip_break outer: {e}")
+        self._close_popup()
 
     def close_break(self):
+        """Handle close/OK button click."""
         print("DEBUG: close_break called")
-        def do_close():
-            try:
-                self.break_timer_running = False
-                print("DEBUG: Destroying popup window via close_break")
-                self.grab_release()
-                self.destroy()
-            except Exception as e:
-                print(f"DEBUG: Exception in close_break destroy: {e}")
-                try:
-                    self.after(100, self._force_destroy)
-                except Exception:
-                    pass
-            self.handle_post_break_close()
+        self._close_popup()
+
+    def _close_popup(self):
+        """Unified method to close the popup safely."""
         try:
-            if threading.current_thread() is threading.main_thread():
-                do_close()
-            else:
-                print("DEBUG: close_break called from non-main thread, using after(0, ...)")
-                self.after(0, do_close)
+            # Stop the break timer
+            self.break_timer_running = False
+            print("DEBUG: Stopping break timer")
+            
+            # Release grab if we have it
+            try:
+                self.grab_release()
+                print("DEBUG: Released grab")
+            except Exception as e:
+                print(f"DEBUG: Could not release grab: {e}")
+            
+            # Handle post-break logic before destroying
+            self.handle_post_break_close()
+            
+            # Destroy the window
+            self.destroy()
+            print("DEBUG: Popup destroyed successfully")
+            
         except Exception as e:
-            print(f"DEBUG: Exception in close_break outer: {e}")
+            print(f"DEBUG: Exception in _close_popup: {e}")
+            # Force destroy as last resort
+            try:
+                self.after_idle(self.destroy)
+            except Exception as e2:
+                print(f"DEBUG: Could not force destroy: {e2}")
 
     def should_auto_start(self):
         """Return True if auto start next session is enabled in settings."""
@@ -378,17 +347,20 @@ class BreakPopup(ctk.CTkToplevel):
 
     def handle_post_break_close(self):
         """Handle logic after break popup is closed (manual or default break)."""
-        if self.should_auto_start():
-            print("DEBUG: Auto-starting work session after break popup close.")
-            self.start_work_timer()
-        else:
-            print("DEBUG: Not auto-starting; resetting to work session.")
-            # Ensure main window is reset to work session
-            if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
-                try:
-                    self.controller.main_window.reset_timer()
-                except Exception as e:
-                    print(f"DEBUG: Could not reset timer after break popup close: {e}")
+        try:
+            if self.should_auto_start():
+                print("DEBUG: Auto-starting work session after break popup close.")
+                self.start_work_timer()
+            else:
+                print("DEBUG: Not auto-starting; resetting to work session.")
+                # Ensure main window is reset to work session
+                if hasattr(self.controller, 'main_window') and hasattr(self.controller.main_window, 'reset_timer'):
+                    try:
+                        self.controller.main_window.reset_timer()
+                    except Exception as e:
+                        print(f"DEBUG: Could not reset timer after break popup close: {e}")
+        except Exception as e:
+            print(f"DEBUG: Error in handle_post_break_close: {e}")
 
     def dismiss(self) -> None:
         """Dismiss the popup (legacy, for compatibility)."""
