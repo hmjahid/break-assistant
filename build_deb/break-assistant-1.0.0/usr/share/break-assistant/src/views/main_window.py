@@ -12,7 +12,7 @@ class MainWindow(ctk.CTk):
             from src.views.break_popup import BreakPopup
             settings = self.controller.get_settings() if hasattr(self.controller, 'get_settings') else {}
             break_duration = int(settings.get('break_duration', 1))
-            break_message = settings.get('break_message', 'Time for your break!')
+            break_message = settings.get('default_break_message', 'Time for your break!')
             
             # Show system notification if enabled
             system_notifications = settings.get('system_notifications', True)

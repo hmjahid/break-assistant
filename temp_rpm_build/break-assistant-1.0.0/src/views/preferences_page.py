@@ -119,12 +119,12 @@ class PreferencesPage(ctk.CTkFrame):
         break_entry = ctk.CTkEntry(timer_frame, textvariable=self.break_duration_var, width=100)
         break_entry.grid(row=2, column=1, padx=(0, 15), pady=5, sticky="w")
         
-        # Add default manual break time input field
-        manual_break_label = ctk.CTkLabel(timer_frame, text="Default Manual Break Duration (minutes):", wraplength=300)
-        manual_break_label.grid(row=3, column=0, padx=(15, 10), pady=5, sticky="w")
-        self.manual_break_duration_var = ctk.StringVar(value="15")
-        manual_break_entry = ctk.CTkEntry(timer_frame, textvariable=self.manual_break_duration_var, width=100)
-        manual_break_entry.grid(row=3, column=1, padx=(0, 15), pady=5, sticky="w")
+        # Add default break message input field
+        default_break_message_label = ctk.CTkLabel(timer_frame, text="Default Break Message:", wraplength=300)
+        default_break_message_label.grid(row=3, column=0, padx=(15, 10), pady=5, sticky="w")
+        self.default_break_message_var = ctk.StringVar(value="Time for your break!")
+        default_break_message_entry = ctk.CTkEntry(timer_frame, textvariable=self.default_break_message_var)
+        default_break_message_entry.grid(row=3, column=1, padx=(0, 15), pady=5, sticky="ew")
         
         self.auto_start_var = ctk.BooleanVar(value=False)
         auto_start_check = ctk.CTkCheckBox(timer_frame, text="Auto-start next session", variable=self.auto_start_var)
@@ -134,13 +134,22 @@ class PreferencesPage(ctk.CTkFrame):
         message_frame = ctk.CTkFrame(parent)
         message_frame.grid(row=row, column=0, sticky="ew", pady=(0, 20), padx=10)
         message_frame.grid_columnconfigure(1, weight=1)
-        message_title = ctk.CTkLabel(message_frame, text="Custom Break Message", font=ctk.CTkFont(size=16, weight="bold"))
+        message_title = ctk.CTkLabel(message_frame, text="Custom Break", font=ctk.CTkFont(size=16, weight="bold"))
         message_title.grid(row=0, column=0, columnspan=2, pady=(10, 15), sticky="ew")
-        message_label = ctk.CTkLabel(message_frame, text="Break Message:", wraplength=300)
-        message_label.grid(row=1, column=0, padx=(15, 10), pady=5, sticky="w")
+        
+        # Custom break duration (moved from timer settings)
+        custom_break_duration_label = ctk.CTkLabel(message_frame, text="Custom Break Duration (minutes):", wraplength=300)
+        custom_break_duration_label.grid(row=1, column=0, padx=(15, 10), pady=5, sticky="w")
+        self.manual_break_duration_var = ctk.StringVar(value="15")
+        custom_break_duration_entry = ctk.CTkEntry(message_frame, textvariable=self.manual_break_duration_var, width=100)
+        custom_break_duration_entry.grid(row=1, column=1, padx=(0, 15), pady=5, sticky="w")
+        
+        # Custom break message
+        message_label = ctk.CTkLabel(message_frame, text="Custom Break Message:", wraplength=300)
+        message_label.grid(row=2, column=0, padx=(15, 10), pady=5, sticky="w")
         self.break_message_var = ctk.StringVar(value="Time for a break!")
         message_entry = ctk.CTkEntry(message_frame, textvariable=self.break_message_var)
-        message_entry.grid(row=1, column=1, padx=(0, 15), pady=5, sticky="ew")
+        message_entry.grid(row=2, column=1, padx=(0, 15), pady=5, sticky="ew")
 
     def create_buttons(self, parent, row):
         buttons_frame = ctk.CTkFrame(parent)
@@ -169,6 +178,7 @@ class PreferencesPage(ctk.CTkFrame):
             # Set default values
             self.work_duration_var.set("20")
             self.break_duration_var.set("1")
+            self.default_break_message_var.set("Time for your break!")
             self.manual_break_duration_var.set("15")
             self.auto_start_var.set(False)
             self.break_message_var.set("Time for a break!")
@@ -218,9 +228,13 @@ class PreferencesPage(ctk.CTkFrame):
                     self.auto_start_var.set(bool(settings.get('auto_start', False)))
                     print(f"DEBUG: Set auto_start to {settings.get('auto_start')}")
                 
+                if 'default_break_message' in settings:
+                    self.default_break_message_var.set(settings['default_break_message'])
+                    print(f"DEBUG: Set default_break_message to {settings['default_break_message']}")
+                
                 if 'break_message' in settings:
                     self.break_message_var.set(settings['break_message'])
-                    print("DEBUG: Set break_message to {settings['break_message']}")
+                    print(f"DEBUG: Set break_message to {settings['break_message']}")
             else:
                 print("DEBUG: No preferences found, using defaults")
         except Exception as e:
@@ -228,6 +242,7 @@ class PreferencesPage(ctk.CTkFrame):
             # Set default values if loading fails
             self.work_duration_var.set("20")
             self.break_duration_var.set("1")
+            self.default_break_message_var.set("Time for your break!")
             self.manual_break_duration_var.set("15")
             self.auto_start_var.set(False)
             self.break_message_var.set("Time for a break!")
@@ -262,6 +277,7 @@ class PreferencesPage(ctk.CTkFrame):
             preferences = {
                 'work_duration': work_duration,
                 'break_duration': break_duration,
+                'default_break_message': self.default_break_message_var.get(),
                 'manual_break_duration': manual_break_duration,
                 'auto_start': bool(self.auto_start_var.get()),
                 'break_message': self.break_message_var.get()
@@ -291,6 +307,7 @@ class PreferencesPage(ctk.CTkFrame):
     def reset_preferences(self) -> None:
         self.work_duration_var.set("20")
         self.break_duration_var.set("1")
+        self.default_break_message_var.set("Time for your break!")
         self.manual_break_duration_var.set("15")
         self.auto_start_var.set(False)
         self.break_message_var.set("Time for a break!")
