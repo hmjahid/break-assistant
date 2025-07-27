@@ -77,8 +77,8 @@ class MainWindow(ctk.CTk):
         super().__init__()
         self.controller = controller
         self.title("Break Assistant")
-        self.geometry("500x432")  # Match break popup width
-        self.minsize(500, 420)  # Keep min width at 500
+        self.geometry("500x460")  # Match break popup width
+        self.minsize(500, 460)  # Keep min width at 500
         
         # Timer variables
         self.timer_running = False
@@ -107,22 +107,27 @@ class MainWindow(ctk.CTk):
         main_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
 
+        # Timer Display Group
+        timer_display_frame = ctk.CTkFrame(main_frame, fg_color=("gray85", "gray17"))
+        timer_display_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        timer_display_frame.grid_columnconfigure(0, weight=1)
+
         # Status Label
-        self.status_label = ctk.CTkLabel(main_frame, text="🎯 Ready", font=ctk.CTkFont(size=18, weight="bold"), text_color=("#2E7D32", "#66BB6A"))
+        self.status_label = ctk.CTkLabel(timer_display_frame, text="🎯 Ready", font=ctk.CTkFont(size=18, weight="bold"), text_color=("#2E7D32", "#66BB6A"))
         self.status_label.grid(row=0, column=0, pady=(10, 5), padx=20, sticky="ew")
 
         # Main Timer Display
-        self.timer_label = ctk.CTkLabel(main_frame, text="--:--", font=ctk.CTkFont(size=48, weight="bold"), text_color=("#1565C0", "#42A5F5"))
+        self.timer_label = ctk.CTkLabel(timer_display_frame, text="--:--", font=ctk.CTkFont(size=48, weight="bold"), text_color=("#1565C0", "#42A5F5"))
         self.timer_label.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="ew")
 
         # Progress bar
-        self.progress_bar = ctk.CTkProgressBar(main_frame, height=12, progress_color=("#4CAF50", "#66BB6A"))
+        self.progress_bar = ctk.CTkProgressBar(timer_display_frame, height=12, progress_color=("#4CAF50", "#66BB6A"))
         self.progress_bar.grid(row=2, column=0, padx=40, pady=(0, 15), sticky="ew")
         self.progress_bar.set(0)
 
         # Button frame
-        button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-        button_frame.grid(row=3, column=0, pady=4, padx=20, sticky="ew")
+        button_frame = ctk.CTkFrame(main_frame, fg_color=("gray85", "gray17"))
+        button_frame.grid(row=3, column=0, pady=(10, 4), padx=20, sticky="ew")
         button_frame.grid_columnconfigure((0, 1), weight=1)
 
         # Start/Stop button
@@ -138,7 +143,7 @@ class MainWindow(ctk.CTk):
         break_now_button.grid(row=4, column=0, padx=25, pady=4, sticky="ew")
 
         # Settings button frame
-        settings_button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        settings_button_frame = ctk.CTkFrame(main_frame, fg_color=("gray85", "gray17"))
         settings_button_frame.grid(row=5, column=0, pady=4, padx=20, sticky="ew")
         settings_button_frame.grid_columnconfigure((0, 1), weight=1)
 
@@ -151,7 +156,7 @@ class MainWindow(ctk.CTk):
         preferences_button.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
         # Next Break Label
-        self.next_break_label = ctk.CTkLabel(main_frame, text="No breaks scheduled", font=ctk.CTkFont(size=12), text_color=("gray20", "gray80"))
+        self.next_break_label = ctk.CTkLabel(main_frame, text="No breaks scheduled", font=ctk.CTkFont(size=12), text_color=("#1565C0", "#42A5F5"))
         self.next_break_label.grid(row=6, column=0, pady=(15, 10), padx=20, sticky="ew")
         
         # Menu bar
