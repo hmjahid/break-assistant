@@ -12,14 +12,14 @@ class BreakPopup(ctk.CTkToplevel):
         super().__init__(master)
         self.controller = controller
         self.title("Break Time!")
-        self.geometry("500x450")  # Reduced height to remove empty space
+        self.geometry("500x460")  # Reduced height to remove empty space
         self.resizable(False, False)
         # Make modal and grab set
         self.transient(master)
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (500 // 2)
         y = (self.winfo_screenheight() // 2) - (450 // 2)
-        self.geometry(f"500x450+{x}+{y}")
+        self.geometry(f"500x460+{x}+{y}")
         self.deiconify()
         self.lift()
         self.focus_force()
