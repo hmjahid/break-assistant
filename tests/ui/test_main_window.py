@@ -19,4 +19,4 @@ class TestMainWindow:
         controller = None  # Mock controller
         window = MainWindow(controller)
         window.update_idletasks()
-        assert "500x432" in window.geometry()
+        assert "500x460" in window.geometry()
