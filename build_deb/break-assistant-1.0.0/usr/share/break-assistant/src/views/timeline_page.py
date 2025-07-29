@@ -253,9 +253,9 @@ ID: {slot.id}"""
         except ValueError as e:
             self.show_error("Error", str(e))
     
-    def delete_selected_slot(self) -> None:
+    def delete_selected_slot(self) -> bool:
         if not self.selected_slot:
-            return
+            return False
         result = self.show_confirm("Confirm Delete", f"Are you sure you want to delete the break at {self.selected_slot.start_time.strftime('%H:%M')}?")
         if result:
             print(f"DEBUG: Deleting break slot: {self.selected_slot.id}")
@@ -269,6 +269,7 @@ ID: {slot.id}"""
                     print("DEBUG: Calling main_window_ref.force_refresh_next_break() after delete_selected_slot")
                     self.controller.main_window_ref.force_refresh_next_break()
                 return True
+        return False
     
     def validate_timeline(self) -> None:
         """Validate the timeline and display results."""

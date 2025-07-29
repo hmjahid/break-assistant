@@ -55,6 +55,7 @@ class MainWindow(ctk.CTk):
                     print(f"DEBUG: Could not show system notification: {e}")
             
             # Pause work timer if running
+            was_timer_running = self.timer_running
             self.stop_timer()
             class ManualBreakSlot:
                 duration = break_duration
@@ -63,7 +64,7 @@ class MainWindow(ctk.CTk):
             break_slot = ManualBreakSlot()
             occurrence_time = datetime.now()
             popup = BreakPopup(self, self.controller)
-            popup.set_break_info(break_slot, occurrence_time, manual_break=True, was_timer_running=self.timer_running)
+            popup.set_break_info(break_slot, occurrence_time, manual_break=True, was_timer_running=was_timer_running)
         except Exception as e:
             print(f"Error in start_break_now: {e}")
     """Main application window."""
@@ -77,8 +78,8 @@ class MainWindow(ctk.CTk):
         super().__init__()
         self.controller = controller
         self.title("Break Assistant")
-        self.geometry("500x460")  # Match break popup width
-        self.minsize(500, 460)  # Keep min width at 500
+        self.geometry("500x464")  # Match break popup width
+        self.minsize(500, 464)  # Keep min width at 500
         
         # Timer variables
         self.timer_running = False
@@ -96,15 +97,18 @@ class MainWindow(ctk.CTk):
         """Setup user interface."""
         # Configure grid
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+
+        # Menu bar
+        self.setup_menu()
 
         # Title
-        title_label = ctk.CTkLabel(self, text="Break Assistant", font=ctk.CTkFont(size=24, weight="bold"))
-        title_label.grid(row=0, column=0, pady=(10, 5), sticky="ew")
+        title_label = ctk.CTkLabel(self, text="", font=ctk.CTkFont(size=20, weight="bold"))
+        title_label.grid(row=1, column=0, padx=10, pady=(0, 0), sticky="ew")
 
         # Main content frame
         main_frame = ctk.CTkFrame(self, fg_color=("gray85", "gray17"))
-        main_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
+        main_frame.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="nsew")
         main_frame.grid_columnconfigure(0, weight=1)
 
         # Timer Display Group
@@ -158,14 +162,11 @@ class MainWindow(ctk.CTk):
         # Next Break Label
         self.next_break_label = ctk.CTkLabel(main_frame, text="No breaks scheduled", font=ctk.CTkFont(size=12), text_color=("#1565C0", "#42A5F5"))
         self.next_break_label.grid(row=6, column=0, pady=(15, 10), padx=20, sticky="ew")
-        
-        # Menu bar
-        self.setup_menu()
     
     def setup_menu(self) -> None:
         """Setup menu bar."""
         menubar = ctk.CTkFrame(self, height=30)
-        menubar.grid(row=0, column=0, sticky="ew", padx=10, pady=(5, 0))
+        menubar.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 0))
 
         # About menu
         about_menu = ctk.CTkButton(menubar, text="About", width=60, height=25, command=self.open_about)
@@ -321,6 +322,9 @@ class MainWindow(ctk.CTk):
 
     def start_timeline_monitor(self) -> None:
         """Start monitoring timeline for upcoming breaks (scheduled breaks)."""
+        if not self.controller:
+            print("DEBUG: Controller not available, timeline monitor not started.")
+            return
         def monitor_loop():
             last_popup_timestamp = None
             last_occurrence_time = None
