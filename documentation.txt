@@ -1,0 +1,87 @@
+Break Assistant Documentation
+============================
+
+Table of Contents
+-----------------
+1. Overview
+2. Features
+3. Installation & Quick Start
+4. Platform-Specific Build & Install Guides
+5. Application Usage Manual
+6. Advanced Timeline Management
+7. Configuration & Settings
+8. Packaging & Distribution
+9. Troubleshooting & Support
+10. Acknowledgments
+
+
+1. Overview
+-----------
+Break Assistant is a cross-platform break reminder application designed to help users maintain healthy work habits through smart break scheduling and customizable notifications. Built using Python, CustomTkinter, and PyInstaller, it supports Linux (AppImage, DEB, RPM), Windows (EXE, MSI), and macOS (App Bundle, DMG).
+
+2. Features
+-----------
+- Smart break scheduling with custom timelines
+- Manual and automatic break reminders
+- Customizable themes (Light, Dark, System)
+- Audio notifications (pygame)
+- Cross-platform support
+- Settings persistence
+- Advanced timeline management
+
+3. Installation & Quick Start
+----------------------------
+See README.md for platform-specific installation commands. You can also run from source:
+
+    git clone https://github.com/break-assistant/break-assistant.git
+    cd break-assistant
+    pip install -r requirements.txt
+    python src/main.py
+
+4. Platform-Specific Build & Install Guides
+------------------------------------------
+- **Linux**: AppImage, DEB, RPM scripts provided. See build_appimage.py, build_deb.py, build_rpm.py.
+- **Windows**: Use build_windows.py to create EXE/MSI. Requires PyInstaller, cx_Freeze.
+- **macOS**: Use build_macos.py to create App Bundle/DMG. Requires PyInstaller, create-dmg.
+
+5. Application Usage Manual
+--------------------------
+- Launch Break Assistant.
+- Set your work and break durations in the settings.
+- Use the timeline manager to add, edit, or remove break slots.
+- When a break is due, a popup appears with options to snooze, skip, or take the break.
+- Progress bars and visual indicators help track your schedule.
+- All settings are saved automatically.
+
+6. Advanced Timeline Management
+------------------------------
+- Define multiple break slots for different times of day.
+- Set repeat patterns: daily, weekdays, weekends, or one-time.
+- Overlap prevention ensures no conflicting breaks.
+- Visual timeline editor for easy management.
+
+7. Configuration & Settings
+--------------------------
+- Settings are stored persistently (see src/models/config_manager.py).
+- Themes: Light, Dark, or System.
+- Audio: Select notification sound (see src/utils/audio.py).
+- Timeline: Custom schedules.
+
+8. Packaging & Distribution
+---------------------------
+- Linux: AppImage, DEB, RPM. Scripts in project root.
+- Windows: EXE and MSI via PyInstaller/cx_Freeze.
+- macOS: App Bundle and DMG via PyInstaller/create-dmg.
+- All scripts check for dependencies and icons.
+
+9. Troubleshooting & Support
+----------------------------
+- See the README.md 'Support' section.
+- Common issues: missing dependencies, platform mismatch, Python version errors.
+- For bug reports, include OS, Python version, steps to reproduce, and error logs.
+
+10. Acknowledgments
+-------------------
+- CustomTkinter, Pygame, PyInstaller, AppImage, cx_Freeze, create-dmg.
+
+For detailed guides, see README.md, TESTING_GUIDE.md, and the Wiki: https://github.com/hmjahid/break-assistant/wiki
